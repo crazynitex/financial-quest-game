@@ -3,7 +3,8 @@ import { GOAL_INFO, simulateConsortium, simulateFinancing } from "@/game/engine"
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Logo } from "./Logo";
-import { Trophy, TrendingUp, RotateCcw, Sparkles, CheckCircle2, XCircle } from "lucide-react";
+import { Trophy, TrendingUp, Sparkles, CheckCircle2, XCircle } from "lucide-react";
+import { UserMenu } from "./UserMenu";
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -25,11 +26,9 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <header className="container py-4 flex items-center justify-between border-b">
+      <header className="container py-3 flex items-center justify-between border-b bg-background/60 backdrop-blur sticky top-0 z-10">
         <Logo />
-        <Button variant="outline" onClick={() => game.resetGame()}>
-          <RotateCcw className="w-4 h-4 mr-2" /> Nova jornada
-        </Button>
+        <UserMenu />
       </header>
 
       <main className="container py-8 max-w-5xl">
