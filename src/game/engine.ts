@@ -104,6 +104,49 @@ export function simulateSavings(target: number, monthlyAmount: number) {
   };
 }
 
+export interface FinTip {
+  id: string;
+  title: string;
+  body: string;
+  emoji: string;
+  category: "consorcio" | "investimento" | "credito" | "mindset" | "planejamento";
+}
+
+export const FIN_TIPS: FinTip[] = [
+  { id: "t1", emoji: "💡", category: "consorcio", title: "O que é consórcio?", body: "Grupo de pessoas que se unem para comprar um bem em comum. Sem juros — apenas taxa de administração, geralmente entre 15% e 20% diluída no prazo." },
+  { id: "t2", emoji: "📉", category: "credito", title: "Juros compostos contra você", body: "Em um financiamento de 60 meses a 1.8% a.m., você pode pagar quase 2x o valor do bem. Compare sempre o CET (Custo Efetivo Total)." },
+  { id: "t3", emoji: "🎯", category: "consorcio", title: "Lance no consórcio", body: "Um lance é uma oferta antecipada de parcelas. Quem oferece o maior lance é contemplado e pode usar a carta de crédito imediatamente." },
+  { id: "t4", emoji: "🛡️", category: "planejamento", title: "Reserva de emergência", body: "Tenha de 3 a 6 meses de despesas guardados antes de assumir grandes compromissos. Isso te protege em demissões e imprevistos." },
+  { id: "t5", emoji: "📊", category: "investimento", title: "Poupança rende pouco", body: "Poupança rende ~0.5% ao mês. Tesouro Selic, CDBs e LCIs costumam render mais com a mesma segurança." },
+  { id: "t6", emoji: "🧠", category: "mindset", title: "Compras por impulso", body: "Espere 24h antes de qualquer compra acima de 10% da sua renda mensal. Esse hábito sozinho pode economizar milhares por ano." },
+  { id: "t7", emoji: "💳", category: "credito", title: "Cartão rotativo é cilada", body: "Os juros do rotativo do cartão chegam a 400% ao ano. Sempre pague a fatura integral ou negocie um parcelamento." },
+  { id: "t8", emoji: "🏠", category: "consorcio", title: "Carta de crédito é dinheiro vivo", body: "Ao ser contemplado, você recebe uma carta de crédito que funciona como pagamento à vista — você pode até negociar descontos." },
+  { id: "t9", emoji: "💼", category: "planejamento", title: "Regra 50/30/20", body: "50% do salário em essenciais, 30% em desejos, 20% em metas e investimentos. Simples e poderoso." },
+  { id: "t10", emoji: "🚀", category: "mindset", title: "Pequenas decisões importam", body: "Economizar R$ 200/mês investidos a 1% a.m. viram quase R$ 70.000 em 15 anos. Disciplina vence renda alta." },
+];
+
+export function pickRandomTip(): FinTip {
+  return FIN_TIPS[Math.floor(Math.random() * FIN_TIPS.length)];
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  emoji: string;
+  check: (s: GameState) => boolean;
+}
+
+export const ACHIEVEMENTS: Achievement[] = [
+  { id: "first_step", title: "Primeiro Passo", description: "Escolheu uma estratégia", emoji: "🎬", check: (s) => s.activeStrategy !== "none" },
+  { id: "saver", title: "Poupador Nato", description: "Saldo acima de 10k", emoji: "💰", check: (s) => s.cash >= 10000 },
+  { id: "wise", title: "Mente Sábia", description: "Score financeiro 80+", emoji: "🧠", check: (s) => s.finScore >= 80 },
+  { id: "veteran", title: "Veterano", description: "12 meses jogados", emoji: "📅", check: (s) => s.month >= 12 },
+  { id: "decider", title: "Decidido", description: "10 decisões tomadas", emoji: "⚡", check: (s) => s.decisions.length >= 10 },
+  { id: "contemplated", title: "Contemplado!", description: "Ganhou a carta de crédito", emoji: "🎊", check: (s) => !!s.strategyData?.contemplated },
+  { id: "level5", title: "Nível 5", description: "Alcançou o nível 5", emoji: "⭐", check: (s) => s.level >= 5 },
+];
+
 export const LIFE_EVENTS: LifeEvent[] = [
   {
     id: "promotion",
@@ -167,6 +210,91 @@ export const LIFE_EVENTS: LifeEvent[] = [
       { label: "Adiantar parcelas do consórcio", cashImpact: 3500, scoreImpact: 10, xpGain: 50, feedback: "Antecipar reduz o prazo total. Ótima jogada!", type: "good" },
       { label: "Investir tudo", cashImpact: 3500, scoreImpact: 12, xpGain: 60, feedback: "Investimento é sempre uma das melhores opções.", type: "good" },
       { label: "Trocar o sofá da sala", cashImpact: -3500, scoreImpact: -5, xpGain: 5, feedback: "Gastar 100% do 13º não é a melhor estratégia.", type: "bad" },
+    ],
+  },
+  {
+    id: "friend_loan",
+    title: "Amigo pedindo empréstimo",
+    description: "Seu melhor amigo pede R$ 2.000 emprestados, sem prazo definido.",
+    emoji: "🤝",
+    options: [
+      { label: "Emprestar tudo", cashImpact: -2000, scoreImpact: -6, xpGain: 10, feedback: "Empréstimo a amigos sem prazo costuma virar presente.", type: "bad" },
+      { label: "Emprestar metade com prazo", cashImpact: -1000, scoreImpact: 2, xpGain: 25, feedback: "Ajudou e protegeu suas finanças. Equilíbrio!", type: "neutral" },
+      { label: "Explicar que não pode agora", cashImpact: 0, scoreImpact: 5, xpGain: 30, feedback: "Dizer 'não' também é cuidar de você.", type: "good" },
+    ],
+  },
+  {
+    id: "investment_offer",
+    title: "Oferta de investimento 'milagroso' 🚨",
+    description: "Um conhecido oferece 10% ao mês garantido em criptomoeda.",
+    emoji: "⚠️",
+    options: [
+      { label: "Investir R$ 5.000", cashImpact: -5000, scoreImpact: -15, xpGain: 5, feedback: "Promessa de retorno garantido alto = pirâmide. Cuidado!", type: "bad" },
+      { label: "Recusar e pesquisar", cashImpact: 0, scoreImpact: 12, xpGain: 50, feedback: "Excelente! Educação financeira evita golpes.", type: "good" },
+    ],
+  },
+  {
+    id: "tax_return",
+    title: "Restituição do IR",
+    description: "Você recebeu R$ 1.800 da Receita Federal!",
+    emoji: "🏦",
+    options: [
+      { label: "Aportar no consórcio", cashImpact: 1800, scoreImpact: 10, xpGain: 45, feedback: "Aporte extra reduz prazo e taxa total!", type: "good" },
+      { label: "Investir no Tesouro", cashImpact: 1800, scoreImpact: 10, xpGain: 45, feedback: "Tesouro Selic é seguro e rende mais que poupança.", type: "good" },
+      { label: "Comprar eletrônicos", cashImpact: -1800, scoreImpact: -6, xpGain: 8, feedback: "Restituição é dinheiro seu, mas use com propósito.", type: "bad" },
+    ],
+  },
+  {
+    id: "course_opportunity",
+    title: "Curso de qualificação",
+    description: "Um curso de R$ 1.200 pode aumentar seu salário em 20%.",
+    emoji: "📚",
+    options: [
+      { label: "Investir no curso", cashImpact: -1200, scoreImpact: 8, xpGain: 50, feedback: "Investir em si mesmo tem o melhor retorno!", type: "good" },
+      { label: "Buscar conteúdo grátis", cashImpact: 0, scoreImpact: 4, xpGain: 30, feedback: "YouTube e cursos gratuitos também funcionam.", type: "neutral" },
+      { label: "Deixar pra depois", cashImpact: 0, scoreImpact: -3, xpGain: 5, feedback: "Procrastinar carreira custa caro a longo prazo.", type: "bad" },
+    ],
+  },
+  {
+    id: "car_breakdown",
+    title: "Carro quebrou 🔧",
+    description: "Conserto urgente de R$ 1.500.",
+    emoji: "🚙",
+    options: [
+      { label: "Pagar com reserva", cashImpact: -1500, scoreImpact: 6, xpGain: 35, feedback: "Para isso serve a reserva. Bem feito.", type: "good" },
+      { label: "Parcelar em 12x no cartão", cashImpact: -2100, scoreImpact: -8, xpGain: 8, feedback: "Juros do cartão devoram o orçamento.", type: "bad" },
+    ],
+  },
+  {
+    id: "wedding_invite",
+    title: "Casamento de amigo 💒",
+    description: "Você foi convidado para um casamento destino. Custo total: R$ 3.000.",
+    emoji: "💍",
+    options: [
+      { label: "Ir e curtir tudo", cashImpact: -3000, scoreImpact: -8, xpGain: 10, feedback: "Eventos sociais são caros. Avalie prioridades.", type: "bad" },
+      { label: "Ir só na cerimônia local", cashImpact: -400, scoreImpact: 3, xpGain: 20, feedback: "Presença sem desequilibrar finanças. Bem pensado.", type: "good" },
+      { label: "Mandar presente e não ir", cashImpact: -200, scoreImpact: 2, xpGain: 15, feedback: "Presente honesto e sem culpa.", type: "neutral" },
+    ],
+  },
+  {
+    id: "side_hustle",
+    title: "Renda extra: freela",
+    description: "Apareceu um freela que paga R$ 2.500 mas exige 2 fins de semana.",
+    emoji: "💻",
+    options: [
+      { label: "Aceitar o freela", cashImpact: 2500, scoreImpact: 10, xpGain: 55, feedback: "Renda extra acelera demais qualquer meta!", type: "good" },
+      { label: "Recusar e descansar", cashImpact: 0, scoreImpact: 0, xpGain: 10, feedback: "Descanso também tem valor, mas pondere.", type: "neutral" },
+    ],
+  },
+  {
+    id: "rent_increase",
+    title: "Aluguel aumentou 📈",
+    description: "Seu aluguel subiu R$ 400/mês com o reajuste do IGPM.",
+    emoji: "🏘️",
+    options: [
+      { label: "Negociar com proprietário", cashImpact: -200, scoreImpact: 6, xpGain: 35, feedback: "Negociar funciona em 70% dos casos!", type: "good" },
+      { label: "Mudar para imóvel mais barato", cashImpact: -800, scoreImpact: 5, xpGain: 30, feedback: "Custo de mudança hoje, economia grande amanhã.", type: "good" },
+      { label: "Aceitar e cortar lazer", cashImpact: -400, scoreImpact: -2, xpGain: 15, feedback: "Aceitar sem negociar deixa dinheiro na mesa.", type: "neutral" },
     ],
   },
 ];
