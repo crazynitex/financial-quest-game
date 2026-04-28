@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { Logo } from "./Logo";
+import { UserMenu } from "./UserMenu";
 import iconHouse from "@/assets/icon-house.png";
 import iconCar from "@/assets/icon-car.png";
 import iconTravel from "@/assets/icon-travel.png";
@@ -30,8 +31,9 @@ export const CharacterCreation = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <header className="container py-6">
+      <header className="container py-4 flex items-center justify-between">
         <Logo />
+        <UserMenu />
       </header>
 
       <main className="container grid lg:grid-cols-2 gap-12 items-center pb-16">
