@@ -8,7 +8,8 @@ import { Logo } from "./Logo";
 import { MentorChat } from "./MentorChat";
 import { StrategyPicker } from "./StrategyPicker";
 import { Dashboard } from "./Dashboard";
-import { Wallet, TrendingUp, Trophy, Calendar, Sparkles, RotateCcw, Award } from "lucide-react";
+import { Wallet, TrendingUp, Trophy, Calendar, Sparkles, Award } from "lucide-react";
+import { UserMenu } from "./UserMenu";
 import { toast } from "sonner";
 
 const formatBRL = (v: number) =>
@@ -72,15 +73,13 @@ export const GameWorld = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <header className="container py-4 flex items-center justify-between border-b">
+      <header className="container py-3 flex items-center justify-between border-b bg-background/60 backdrop-blur sticky top-0 z-10">
         <Logo />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={() => game.finish()}>
-            <Award className="w-4 h-4 mr-1.5" /> Ver Dashboard
+            <Award className="w-4 h-4 mr-1.5" /> <span className="hidden sm:inline">Dashboard</span>
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => { game.resetGame(); }}>
-            <RotateCcw className="w-4 h-4 mr-1.5" /> Reiniciar
-          </Button>
+          <UserMenu />
         </div>
       </header>
 
