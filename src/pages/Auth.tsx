@@ -45,7 +45,7 @@ const AuthPage = () => {
       toast.error(error.message.includes("already") ? "Este email já está cadastrado." : error.message);
       return;
     }
-    toast.success("Conta criada! Bem-vindo ao Consórcio Quest 🎉");
+    toast.success("Conta criada! Bem-vindo ao Ademi Conecta 🎉");
     navigate("/");
   };
 
