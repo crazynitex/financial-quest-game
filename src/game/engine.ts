@@ -11,6 +11,8 @@ export interface GameState {
   character: Character;
   cash: number;
   savings: number;
+  invested: number;
+  monthlyExpenses: number; // gastos fixos mensais
   month: number;
   level: number;
   xp: number;
@@ -27,7 +29,96 @@ export interface GameState {
     contemplated?: boolean;
   };
   finished: boolean;
+  gameOver: boolean;
+  gameOverReason?: string;
+  lessonsCompleted: string[];
 }
+
+// Mini-lições interativas sobre consórcio
+export interface Lesson {
+  id: string;
+  title: string;
+  emoji: string;
+  duration: string;
+  steps: { title: string; body: string }[];
+  quiz: { question: string; options: string[]; correct: number; explain: string };
+  xpReward: number;
+}
+
+export const LESSONS: Lesson[] = [
+  {
+    id: "l1",
+    title: "O que é um consórcio?",
+    emoji: "🤝",
+    duration: "2 min",
+    xpReward: 80,
+    steps: [
+      { title: "A ideia central", body: "Consórcio é um grupo de pessoas que se unem para comprar o mesmo tipo de bem (imóvel, carro, viagem). Cada um paga uma parcela mensal e, todo mês, alguém é contemplado." },
+      { title: "Como recebo o bem?", body: "Há duas formas: sorteio (todo mês um participante é sorteado) ou lance (você oferece um valor extra para passar na frente)." },
+      { title: "E os juros?", body: "Não existem juros. Só uma taxa de administração diluída ao longo do prazo — geralmente entre 15% e 20%, muito menor que financiamento." },
+    ],
+    quiz: {
+      question: "Qual é a maior diferença entre consórcio e financiamento?",
+      options: ["Consórcio tem juros menores", "Consórcio não tem juros, só taxa de administração", "Financiamento é mais barato"],
+      correct: 1,
+      explain: "Exato! Consórcio substitui juros por uma taxa de administração diluída, o que reduz o custo total significativamente.",
+    },
+  },
+  {
+    id: "l2",
+    title: "Lance: como acelerar a contemplação",
+    emoji: "🎯",
+    duration: "2 min",
+    xpReward: 80,
+    steps: [
+      { title: "O que é lance?", body: "Lance é uma oferta antecipada de parcelas. Quem oferece o maior lance no mês é contemplado, mesmo sem ter sido sorteado." },
+      { title: "Tipos de lance", body: "Lance livre (você decide o valor), lance fixo (% definido pelo grupo) e lance embutido (usa parte da carta de crédito como lance)." },
+      { title: "Estratégia", body: "Se você tem uma reserva, dar lance pode adiantar o objetivo em meses ou anos. O valor do lance ainda abate as suas parcelas finais." },
+    ],
+    quiz: {
+      question: "Se você tem R$ 5.000 sobrando, vale a pena dar lance?",
+      options: ["Não, é dinheiro perdido", "Sim, antecipa a contemplação e abate parcelas", "Só se for lance embutido"],
+      correct: 1,
+      explain: "Lance é estratégico: antecipa o bem e ainda reduz o saldo devedor. Não é gasto, é antecipação.",
+    },
+  },
+  {
+    id: "l3",
+    title: "Carta de crédito: dinheiro vivo",
+    emoji: "💳",
+    duration: "2 min",
+    xpReward: 80,
+    steps: [
+      { title: "O que é?", body: "A carta de crédito é o valor total que você combinou (ex: R$ 80.000 para um carro). Quando contemplado, você usa esse valor para comprar." },
+      { title: "Poder de compra à vista", body: "Como vendedores recebem o valor todo de uma vez, você consegue descontos de 5% a 15% — é como pagar à vista." },
+      { title: "Flexibilidade", body: "Carro, imóvel ou serviço: a carta pode ser usada em qualquer marca, modelo ou imobiliária da categoria contratada." },
+    ],
+    quiz: {
+      question: "A carta de crédito serve apenas em uma loja específica?",
+      options: ["Sim, só na empresa do consórcio", "Não, vale como dinheiro à vista em qualquer loja", "Só em concessionárias parceiras"],
+      correct: 1,
+      explain: "A carta funciona como pagamento à vista — você escolhe onde gastar dentro da categoria.",
+    },
+  },
+  {
+    id: "l4",
+    title: "Quando consórcio NÃO é a melhor opção",
+    emoji: "⚖️",
+    duration: "2 min",
+    xpReward: 80,
+    steps: [
+      { title: "Urgência", body: "Se você precisa do bem agora (ex: carro para trabalhar amanhã), consórcio pode não ser ideal — pode levar meses até ser contemplado." },
+      { title: "Disciplina financeira", body: "É um compromisso de longo prazo. Se sua renda é instável, planeje uma reserva antes de entrar." },
+      { title: "Solução híbrida", body: "Muitos combinam consórcio + reserva de emergência: você paga as parcelas e dá um lance quando juntar dinheiro extra." },
+    ],
+    quiz: {
+      question: "Qual é o principal cuidado antes de entrar em um consórcio?",
+      options: ["Ter o bem em mente", "Ter reserva e prazo compatível com sua urgência", "Escolher a maior parcela possível"],
+      correct: 1,
+      explain: "Compatibilidade é tudo: alinhar prazo, parcela e urgência evita inadimplência.",
+    },
+  },
+];
 
 export interface Decision {
   month: number;
