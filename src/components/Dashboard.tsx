@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Logo } from "./Logo";
 import { Trophy, TrendingUp, Sparkles, CheckCircle2, XCircle } from "lucide-react";
 import { UserMenu } from "./UserMenu";
+import { CTABanner } from "./CTABanner";
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -141,7 +142,9 @@ export const Dashboard = () => {
           </Card>
         )}
 
-        <div className="text-center">
+        <CTABanner />
+
+        <div className="text-center mt-8">
           <Button size="lg" onClick={() => game.resetGame()} className="bg-gradient-primary h-14 px-8 shadow-elegant">
             Jogar novamente
           </Button>
