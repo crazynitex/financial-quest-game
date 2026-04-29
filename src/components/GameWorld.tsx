@@ -8,7 +8,11 @@ import { Logo } from "./Logo";
 import { MentorChat } from "./MentorChat";
 import { StrategyPicker } from "./StrategyPicker";
 import { Dashboard } from "./Dashboard";
-import { Wallet, TrendingUp, Trophy, Calendar, Sparkles, Award, ArrowUp, ArrowDown, Zap } from "lucide-react";
+import { GameOverScreen } from "./GameOverScreen";
+import { AcademyModal } from "./AcademyModal";
+import { ActionsPanel } from "./ActionsPanel";
+import { CTABanner } from "./CTABanner";
+import { Wallet, TrendingUp, Trophy, Calendar, Sparkles, Award, ArrowUp, ArrowDown, Zap, Receipt, PiggyBank } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { toast } from "sonner";
 import { FinTipCard } from "./FinTipCard";
@@ -25,6 +29,8 @@ export const GameWorld = () => {
   const [confettiTrigger, setConfettiTrigger] = useState(0);
   const [cashFlash, setCashFlash] = useState<"up" | "down" | null>(null);
   const [prevCash, setPrevCash] = useState(game.cash);
+  const [academyOpen, setAcademyOpen] = useState(false);
+  const [zeroMonths, setZeroMonths] = useState(0);
 
   useEffect(() => {
     if (game.cash !== prevCash) {
@@ -35,6 +41,7 @@ export const GameWorld = () => {
     }
   }, [game.cash, prevCash]);
 
+  if (game.gameOver) return <GameOverScreen />;
   if (game.finished) return <Dashboard />;
 
   const goal = GOAL_INFO[game.character.goal];
@@ -49,43 +56,76 @@ export const GameWorld = () => {
 
   const xpInLevel = game.xp % 100;
   const unlockedAchievements = ACHIEVEMENTS.filter((a) => game.achievements.includes(a.id));
+  const monthlyNet = game.character.income - game.monthlyExpenses;
 
   const triggerEvent = () => setCurrentEvent(pickRandomEvent());
 
   const advanceMonth = () => {
+    // 1. Aplicar fluxo mensal real: renda - despesas
+    let cashAfter = game.cash + monthlyNet;
+    let scoreDelta = 0;
+    let messages: string[] = [`💰 Renda: ${formatBRL(game.character.income)} • 🧾 Despesas: ${formatBRL(game.monthlyExpenses)}`];
+
+    // 2. Pagar parcela da estratégia se houver
     if (game.activeStrategy !== "none" && strat) {
-      if (game.cash < strat.monthlyPayment) {
-        toast.error("Saldo insuficiente para a parcela!", {
-          description: "Sua reserva acabou. Cuidado com a inadimplência.",
+      if (cashAfter < strat.monthlyPayment) {
+        // não pode pagar
+        toast.error("⚠️ Saldo insuficiente para a parcela do consórcio!", {
+          description: "Score caiu. Cuidado com a inadimplência.",
         });
-        game.applyEvent(0, -10, 5);
+        scoreDelta -= 12;
+        const newZero = zeroMonths + 1;
+        setZeroMonths(newZero);
+        game.applyEvent(monthlyNet, scoreDelta, 5);
+        if (newZero >= 2) {
+          setTimeout(() => game.triggerGameOver("Você ficou 2 meses sem conseguir pagar suas parcelas. A inadimplência interrompeu sua jornada."), 600);
+        }
         return;
       }
+      cashAfter -= strat.monthlyPayment;
       game.payMonth();
-      if (strat.monthsPaid + 1 >= strat.monthsTotal || (game.activeStrategy === "consortium" && strat.contemplated)) {
-        if (strat.contemplated || strat.monthsPaid + 1 >= strat.monthsTotal) {
-          toast.success(`🎉 Você conquistou: ${goal.label}!`, {
-            description: "Missão cumprida com sucesso!",
-          });
-          setConfettiTrigger((t) => t + 1);
-          game.applyEvent(game.character.income, 20, 200);
-          setTimeout(() => game.finish(), 1500);
-          return;
-        }
-      }
-      if (game.activeStrategy === "consortium" && strat.contemplated && strat.monthsPaid === 0) {
-        toast.success("🎊 Você foi contemplado!", {
-          description: "Sua carta de crédito está disponível!",
+      messages.push(`📄 Parcela paga: ${formatBRL(strat.monthlyPayment)}`);
+
+      const wasContemplated = strat.contemplated;
+      const willBeContemplatedNow = game.activeStrategy === "consortium" && !wasContemplated;
+
+      // sucesso final
+      if (strat.monthsPaid + 1 >= strat.monthsTotal) {
+        toast.success(`🎉 Você conquistou: ${goal.label}!`, {
+          description: "Missão cumprida com sucesso!",
         });
         setConfettiTrigger((t) => t + 1);
+        game.applyEvent(monthlyNet, 20, 200);
+        setTimeout(() => game.finish(), 1500);
+        return;
       }
     }
+
+    // 3. Verificar saldo zerado (sem estratégia ativa)
+    if (cashAfter <= 0) {
+      const newZero = zeroMonths + 1;
+      setZeroMonths(newZero);
+      toast.error("💸 Você ficou sem dinheiro!", {
+        description: newZero >= 2 ? "Game Over iminente." : "Reaja: pegue um freela ou corte gastos!",
+      });
+      scoreDelta -= 8;
+      if (newZero >= 2) {
+        game.applyEvent(monthlyNet, scoreDelta, 10);
+        setTimeout(() => game.triggerGameOver("Suas finanças entraram em colapso por 2 meses seguidos. Sem reserva para imprevistos, a jornada terminou aqui."), 600);
+        return;
+      }
+    } else {
+      setZeroMonths(0);
+    }
+
+    // 4. Evento aleatório (60% chance) ou mês tranquilo
     if (Math.random() < 0.6) {
+      // aplica fluxo e mostra evento
+      game.applyEvent(monthlyNet - (strat?.monthlyPayment ?? 0), scoreDelta + 1, 15);
       triggerEvent();
     } else {
-      game.applyEvent(game.character.income - Math.round(game.character.income * 0.7), 1, 15);
-      toast("Mês tranquilo", { description: "Receita - despesas básicas computadas." });
-      // a cada mês tranquilo, mostra uma nova dica
+      game.applyEvent(monthlyNet - (strat?.monthlyPayment ?? 0), scoreDelta + 2, 18);
+      toast(messages[0], { description: messages[1] ?? "Mês tranquilo. Saldo atualizado." });
       setTipTrigger((t) => t + 1);
     }
   };
@@ -93,6 +133,7 @@ export const GameWorld = () => {
   return (
     <div className="min-h-screen bg-gradient-hero relative">
       <AchievementWatcher />
+      <AcademyModal open={academyOpen} onOpenChange={setAcademyOpen} />
       <div className="relative">
         <Confetti trigger={confettiTrigger} />
       </div>
@@ -100,6 +141,9 @@ export const GameWorld = () => {
       <header className="container py-3 flex items-center justify-between border-b bg-background/70 backdrop-blur sticky top-0 z-20">
         <Logo />
         <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={() => setAcademyOpen(true)}>
+            <Sparkles className="w-4 h-4 mr-1.5 text-primary" /> <span className="hidden sm:inline">Academy</span>
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => game.finish()}>
             <Award className="w-4 h-4 mr-1.5" /> <span className="hidden sm:inline">Dashboard</span>
           </Button>
@@ -123,6 +167,20 @@ export const GameWorld = () => {
             <StatCard icon={<Trophy />} label="Nível" value={`${game.level}`} accent />
           </div>
 
+          {/* Fluxo mensal */}
+          <Card className="p-3 bg-gradient-card border flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1.5"><ArrowUp className="w-3.5 h-3.5 text-success" /> Renda <span className="font-bold tabular-nums">{formatBRL(game.character.income)}</span></span>
+              <span className="text-muted-foreground">•</span>
+              <span className="flex items-center gap-1.5"><Receipt className="w-3.5 h-3.5 text-destructive" /> Despesas <span className="font-bold tabular-nums">{formatBRL(game.monthlyExpenses)}</span></span>
+              <span className="text-muted-foreground">•</span>
+              <span className="flex items-center gap-1.5"><PiggyBank className="w-3.5 h-3.5 text-primary" /> Investido <span className="font-bold tabular-nums">{formatBRL(game.invested)}</span></span>
+            </div>
+            <span className={`text-xs font-bold px-2 py-1 rounded-full ${monthlyNet >= 0 ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
+              {monthlyNet >= 0 ? "+" : ""}{formatBRL(monthlyNet)}/mês
+            </span>
+          </Card>
+
           {/* XP bar */}
           <Card className="p-3 bg-gradient-card border">
             <div className="flex items-center justify-between mb-1.5 text-xs">
@@ -140,7 +198,6 @@ export const GameWorld = () => {
             </div>
           </Card>
 
-          {/* Dica financeira animada */}
           <FinTipCard trigger={tipTrigger} />
 
           {/* Mission card */}
@@ -176,14 +233,14 @@ export const GameWorld = () => {
                 {game.activeStrategy === "consortium" && (
                   <div className={`text-sm font-semibold flex items-center gap-1.5 ${strat.contemplated ? "text-success animate-pop-in" : "text-muted-foreground"}`}>
                     <Sparkles className={`w-4 h-4 ${!strat.contemplated && "animate-pulse"}`} />
-                    {strat.contemplated ? "✓ Contemplado! Carta disponível" : "Aguardando sorteio..."}
+                    {strat.contemplated ? "✓ Contemplado! Carta disponível" : "Aguardando sorteio... (ou dê um lance)"}
                   </div>
                 )}
               </div>
             )}
 
             {game.activeStrategy === "none" ? (
-              <StrategyPicker onPick={() => toast.success("Estratégia ativada! Avance os meses.")} />
+              <StrategyPicker onPick={() => toast.success("Estratégia ativada! Use as ações livres e avance os meses.")} />
             ) : (
               <Button
                 onClick={advanceMonth}
@@ -194,6 +251,11 @@ export const GameWorld = () => {
               </Button>
             )}
           </Card>
+
+          {/* Painel de ações livres */}
+          {game.activeStrategy !== "none" && (
+            <ActionsPanel onOpenAcademy={() => setAcademyOpen(true)} />
+          )}
 
           {/* Conquistas */}
           {unlockedAchievements.length > 0 && (
@@ -225,6 +287,9 @@ export const GameWorld = () => {
               </div>
             </Card>
           )}
+
+          {/* CTA Ademicon */}
+          <CTABanner compact />
 
           {/* Event modal */}
           {currentEvent && (

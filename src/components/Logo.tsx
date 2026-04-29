@@ -9,7 +9,7 @@ export const Logo = ({ className = "" }: { className?: string }) => (
     </div>
     <div className="flex flex-col leading-none">
       <span className="font-display font-bold text-lg tracking-tight">
-        Consórcio<span className="text-primary">Quest</span>
+        Ademi<span className="text-primary">Conecta</span>
       </span>
       <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
         powered by Ademicon

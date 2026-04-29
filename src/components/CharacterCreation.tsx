@@ -42,16 +42,16 @@ export const CharacterCreation = () => {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent border border-primary/20">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-              Novo • Hackathon Edition
+              Ademi Conecta • Hackathon Edition
             </span>
           </div>
           <h1 className="font-display text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight">
-            O jogo da<br />
-            <span className="text-primary">vida financeira</span>
+            Aprenda consórcio<br />
+            <span className="text-primary">jogando de verdade</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-md">
-            Viva uma jornada real, tome decisões, e descubra como o consórcio
-            pode mudar seu futuro — guiado por uma IA mentora.
+            Viva uma jornada financeira real, faça lições rápidas, supere imprevistos
+            e descubra como o consórcio pode mudar seu futuro — guiado por uma IA mentora.
           </p>
           <img
             src={heroImg}

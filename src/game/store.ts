@@ -15,6 +15,14 @@ interface GameStore extends GameState {
   ) => void;
   payMonth: () => void;
   finish: () => void;
+  triggerGameOver: (reason: string) => void;
+  // Ações livres
+  doSideHustle: () => void;
+  doInvest: (amount: number) => void;
+  doCutExpenses: () => void;
+  doStudyMore: () => void;
+  doBidConsortium: (amount: number) => boolean;
+  completeLesson: (lessonId: string, xp: number) => void;
   loadFromCloud: (userId: string) => Promise<void>;
   saveToCloud: (userId: string) => Promise<void>;
   clearLocal: () => void;
@@ -24,6 +32,8 @@ const initial: GameState = {
   character: { name: "", age: 25, income: 4000, goal: "house" },
   cash: 5000,
   savings: 0,
+  invested: 0,
+  monthlyExpenses: 2800,
   month: 1,
   level: 1,
   xp: 0,
@@ -32,6 +42,8 @@ const initial: GameState = {
   achievements: [],
   activeStrategy: "none",
   finished: false,
+  gameOver: false,
+  lessonsCompleted: [],
 };
 
 export const useGame = create<GameStore>()(
@@ -45,6 +57,8 @@ export const useGame = create<GameStore>()(
           hydrated: true,
           character,
           cash: Math.round(character.income * 1.5),
+          // despesas baseadas em renda (~65% para realismo)
+          monthlyExpenses: Math.round(character.income * 0.65),
         }),
       resetGame: () => set({ ...initial, hydrated: true }),
       clearLocal: () => set({ ...initial, hydrated: false }),
@@ -57,8 +71,9 @@ export const useGame = create<GameStore>()(
       applyEvent: (cashImpact, scoreImpact, xpGain) =>
         set((s) => {
           const newXp = s.xp + xpGain;
+          const newCash = Math.max(0, s.cash + cashImpact);
           return {
-            cash: Math.max(0, s.cash + cashImpact),
+            cash: newCash,
             finScore: Math.max(0, Math.min(100, s.finScore + scoreImpact)),
             xp: newXp,
             level: Math.floor(newXp / 100) + 1,
@@ -89,6 +104,71 @@ export const useGame = create<GameStore>()(
           };
         }),
       finish: () => set({ finished: true }),
+      triggerGameOver: (reason) => set({ gameOver: true, gameOverReason: reason }),
+
+      doSideHustle: () =>
+        set((s) => {
+          const earned = Math.round(s.character.income * 0.25 + Math.random() * 600);
+          return {
+            cash: s.cash + earned,
+            xp: s.xp + 25,
+            finScore: Math.min(100, s.finScore + 2),
+            level: Math.floor((s.xp + 25) / 100) + 1,
+          };
+        }),
+      doInvest: (amount) =>
+        set((s) => {
+          if (s.cash < amount) return s;
+          return {
+            cash: s.cash - amount,
+            invested: s.invested + amount,
+            xp: s.xp + 15,
+            finScore: Math.min(100, s.finScore + 4),
+          };
+        }),
+      doCutExpenses: () =>
+        set((s) => {
+          const cut = Math.round(s.monthlyExpenses * 0.1);
+          return {
+            monthlyExpenses: Math.max(Math.round(s.character.income * 0.3), s.monthlyExpenses - cut),
+            xp: s.xp + 20,
+            finScore: Math.min(100, s.finScore + 6),
+          };
+        }),
+      doStudyMore: () =>
+        set((s) => ({
+          xp: s.xp + 30,
+          finScore: Math.min(100, s.finScore + 3),
+          level: Math.floor((s.xp + 30) / 100) + 1,
+        })),
+      doBidConsortium: (amount) => {
+        const s = get();
+        if (!s.strategyData || s.activeStrategy !== "consortium" || s.strategyData.contemplated) return false;
+        if (s.cash < amount) return false;
+        // chance proporcional ao lance vs parcela mensal
+        const successChance = Math.min(0.85, (amount / (s.strategyData.monthlyPayment * 6)) * 0.5);
+        const success = Math.random() < successChance;
+        set({
+          cash: s.cash - amount,
+          strategyData: {
+            ...s.strategyData,
+            contemplated: success,
+            monthsPaid: success ? s.strategyData.monthsPaid : s.strategyData.monthsPaid,
+          },
+          xp: s.xp + 30,
+        });
+        return success;
+      },
+      completeLesson: (lessonId, xp) =>
+        set((s) => {
+          if (s.lessonsCompleted.includes(lessonId)) return s;
+          return {
+            lessonsCompleted: [...s.lessonsCompleted, lessonId],
+            xp: s.xp + xp,
+            finScore: Math.min(100, s.finScore + 5),
+            level: Math.floor((s.xp + xp) / 100) + 1,
+          };
+        }),
       loadFromCloud: async (userId) => {
         const { data, error } = await supabase
           .from("game_saves")
@@ -101,7 +181,7 @@ export const useGame = create<GameStore>()(
           return;
         }
         if (data?.state && Object.keys(data.state).length > 0) {
-          set({ ...(data.state as any), hydrated: true });
+          set({ ...initial, ...(data.state as any), hydrated: true });
         } else {
           set({ ...initial, hydrated: true });
         }
@@ -109,7 +189,6 @@ export const useGame = create<GameStore>()(
       saveToCloud: async (userId) => {
         const state = get();
         const { hydrated, ...toSave } = state as any;
-        // remove function refs
         const cleanState = JSON.parse(JSON.stringify(toSave));
         const { error } = await supabase
           .from("game_saves")
