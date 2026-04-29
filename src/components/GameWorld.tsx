@@ -138,24 +138,24 @@ export const GameWorld = () => {
         <Confetti trigger={confettiTrigger} />
       </div>
 
-      <header className="container py-3 flex items-center justify-between border-b bg-background/70 backdrop-blur sticky top-0 z-20">
+      <header className="container py-3 flex items-center justify-between gap-2 border-b bg-background/70 backdrop-blur sticky top-0 z-20">
         <Logo />
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => setAcademyOpen(true)}>
-            <Sparkles className="w-4 h-4 mr-1.5 text-primary" /> <span className="hidden sm:inline">Academy</span>
+        <div className="flex items-center gap-1 shrink-0">
+          <Button variant="ghost" size="sm" onClick={() => setAcademyOpen(true)} className="px-2 sm:px-3">
+            <Sparkles className="w-4 h-4 sm:mr-1.5 text-primary" /> <span className="hidden sm:inline">Academy</span>
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => game.finish()}>
-            <Award className="w-4 h-4 mr-1.5" /> <span className="hidden sm:inline">Dashboard</span>
+          <Button variant="ghost" size="sm" onClick={() => game.finish()} className="px-2 sm:px-3">
+            <Award className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Dashboard</span>
           </Button>
           <UserMenu />
         </div>
       </header>
 
-      <main className="container py-6 grid lg:grid-cols-3 gap-6">
+      <main className="container py-4 sm:py-6 grid lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left: Game */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-3 sm:space-y-4 min-w-0">
           {/* Player stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
             <StatCard
               icon={<Wallet />}
               label="Saldo"
@@ -168,17 +168,27 @@ export const GameWorld = () => {
           </div>
 
           {/* Fluxo mensal */}
-          <Card className="p-3 bg-gradient-card border flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5"><ArrowUp className="w-3.5 h-3.5 text-success" /> Renda <span className="font-bold tabular-nums">{formatBRL(game.character.income)}</span></span>
-              <span className="text-muted-foreground">•</span>
-              <span className="flex items-center gap-1.5"><Receipt className="w-3.5 h-3.5 text-destructive" /> Despesas <span className="font-bold tabular-nums">{formatBRL(game.monthlyExpenses)}</span></span>
-              <span className="text-muted-foreground">•</span>
-              <span className="flex items-center gap-1.5"><PiggyBank className="w-3.5 h-3.5 text-primary" /> Investido <span className="font-bold tabular-nums">{formatBRL(game.invested)}</span></span>
+          <Card className="p-3 bg-gradient-card border">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Fluxo mensal</span>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${monthlyNet >= 0 ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
+                {monthlyNet >= 0 ? "+" : ""}{formatBRL(monthlyNet)}/mês
+              </span>
             </div>
-            <span className={`text-xs font-bold px-2 py-1 rounded-full ${monthlyNet >= 0 ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
-              {monthlyNet >= 0 ? "+" : ""}{formatBRL(monthlyNet)}/mês
-            </span>
+            <div className="grid grid-cols-3 gap-2 text-[11px] sm:text-xs">
+              <div className="flex flex-col">
+                <span className="flex items-center gap-1 text-muted-foreground"><ArrowUp className="w-3 h-3 text-success" /> Renda</span>
+                <span className="font-bold tabular-nums">{formatBRL(game.character.income)}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="flex items-center gap-1 text-muted-foreground"><Receipt className="w-3 h-3 text-destructive" /> Despesas</span>
+                <span className="font-bold tabular-nums">{formatBRL(game.monthlyExpenses)}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="flex items-center gap-1 text-muted-foreground"><PiggyBank className="w-3 h-3 text-primary" /> Investido</span>
+                <span className="font-bold tabular-nums">{formatBRL(game.invested)}</span>
+              </div>
+            </div>
           </Card>
 
           {/* XP bar */}
