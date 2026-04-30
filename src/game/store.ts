@@ -23,6 +23,9 @@ interface GameStore extends GameState {
   doStudyMore: () => void;
   doBidConsortium: (amount: number) => boolean;
   completeLesson: (lessonId: string, xp: number) => void;
+  startNewCycle: () => void;
+  sellAsset: (value: number) => void;
+  awardMiniGame: (xp: number, cash: number, score: number) => void;
   loadFromCloud: (userId: string) => Promise<void>;
   saveToCloud: (userId: string) => Promise<void>;
   clearLocal: () => void;
@@ -169,6 +172,28 @@ export const useGame = create<GameStore>()(
             level: Math.floor((s.xp + xp) / 100) + 1,
           };
         }),
+      startNewCycle: () =>
+        set((s) => ({
+          activeStrategy: "none",
+          strategyData: undefined,
+          xp: s.xp + 100,
+          finScore: Math.min(100, s.finScore + 10),
+          achievements: s.achievements.includes("scaler") ? s.achievements : [...s.achievements, "scaler"],
+        })),
+      sellAsset: (value) =>
+        set((s) => ({
+          cash: s.cash + value,
+          activeStrategy: "none",
+          strategyData: undefined,
+          xp: s.xp + 50,
+        })),
+      awardMiniGame: (xp, cash, score) =>
+        set((s) => ({
+          cash: s.cash + cash,
+          xp: s.xp + xp,
+          finScore: Math.min(100, s.finScore + score),
+          level: Math.floor((s.xp + xp) / 100) + 1,
+        })),
       loadFromCloud: async (userId) => {
         const { data, error } = await supabase
           .from("game_saves")
