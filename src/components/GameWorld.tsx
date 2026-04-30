@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGame } from "@/game/store";
-import { GOAL_INFO, pickRandomEvent, ACHIEVEMENTS, type LifeEvent } from "@/game/engine";
+import { GOAL_INFO, pickRandomEvent, ACHIEVEMENTS, pickRandomMiniGame, pickRandomPostEvent, type LifeEvent, type MiniGame, type PostEvent } from "@/game/engine";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -12,25 +12,31 @@ import { GameOverScreen } from "./GameOverScreen";
 import { AcademyModal } from "./AcademyModal";
 import { ActionsPanel } from "./ActionsPanel";
 import { CTABanner } from "./CTABanner";
-import { Wallet, TrendingUp, Trophy, Calendar, Sparkles, Award, ArrowUp, ArrowDown, Zap, Receipt, PiggyBank } from "lucide-react";
+import { Tutorial } from "./Tutorial";
+import { MiniGameModal } from "./MiniGameModal";
+import { PostContemplationCard } from "./PostContemplationCard";
+import { Wallet, TrendingUp, Trophy, Calendar, Sparkles, Award, ArrowUp, ArrowDown, Zap, Receipt, PiggyBank, HelpCircle } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { toast } from "sonner";
 import { FinTipCard } from "./FinTipCard";
 import { Confetti } from "./Confetti";
 import { AchievementWatcher } from "./AchievementToast";
+import { restartTutorial } from "./Tutorial";
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
 export const GameWorld = () => {
   const game = useGame();
-  const [currentEvent, setCurrentEvent] = useState<LifeEvent | null>(null);
+  const [currentEvent, setCurrentEvent] = useState<LifeEvent | PostEvent | null>(null);
   const [tipTrigger, setTipTrigger] = useState(0);
   const [confettiTrigger, setConfettiTrigger] = useState(0);
   const [cashFlash, setCashFlash] = useState<"up" | "down" | null>(null);
   const [prevCash, setPrevCash] = useState(game.cash);
   const [academyOpen, setAcademyOpen] = useState(false);
   const [zeroMonths, setZeroMonths] = useState(0);
+  const [miniGame, setMiniGame] = useState<MiniGame | null>(null);
+  const [prevContemplated, setPrevContemplated] = useState(!!game.strategyData?.contemplated);
 
   useEffect(() => {
     if (game.cash !== prevCash) {
@@ -40,6 +46,19 @@ export const GameWorld = () => {
       return () => clearTimeout(t);
     }
   }, [game.cash, prevCash]);
+
+  // Detecta contemplação para confete
+  useEffect(() => {
+    const isContemplated = !!game.strategyData?.contemplated;
+    if (isContemplated && !prevContemplated) {
+      setConfettiTrigger((t) => t + 1);
+      toast.success("🎊 CONTEMPLADO! Sua carta de crédito está liberada!", {
+        description: "Agora gerencie seu novo bem ou comece outro ciclo.",
+        duration: 6000,
+      });
+    }
+    setPrevContemplated(isContemplated);
+  }, [game.strategyData?.contemplated, prevContemplated]);
 
   if (game.gameOver) return <GameOverScreen />;
   if (game.finished) return <Dashboard />;
@@ -58,7 +77,16 @@ export const GameWorld = () => {
   const unlockedAchievements = ACHIEVEMENTS.filter((a) => game.achievements.includes(a.id));
   const monthlyNet = game.character.income - game.monthlyExpenses;
 
-  const triggerEvent = () => setCurrentEvent(pickRandomEvent());
+  const isContemplated = !!game.strategyData?.contemplated;
+  const triggerEvent = () => {
+    // Pós-contemplação tem eventos próprios mais ricos
+    if (isContemplated && Math.random() < 0.55) {
+      setCurrentEvent(pickRandomPostEvent() as any);
+    } else {
+      setCurrentEvent(pickRandomEvent());
+    }
+  };
+  const triggerMiniGame = () => setMiniGame(pickRandomMiniGame());
 
   const advanceMonth = () => {
     // 1. Aplicar fluxo mensal real: renda - despesas
@@ -118,11 +146,14 @@ export const GameWorld = () => {
       setZeroMonths(0);
     }
 
-    // 4. Evento aleatório (60% chance) ou mês tranquilo
-    if (Math.random() < 0.6) {
-      // aplica fluxo e mostra evento
+    // 4. Eventos: 50% evento da vida, 30% mini-game, 20% mês tranquilo
+    const roll = Math.random();
+    if (roll < 0.5) {
       game.applyEvent(monthlyNet - (strat?.monthlyPayment ?? 0), scoreDelta + 1, 15);
       triggerEvent();
+    } else if (roll < 0.8) {
+      game.applyEvent(monthlyNet - (strat?.monthlyPayment ?? 0), scoreDelta + 1, 15);
+      triggerMiniGame();
     } else {
       game.applyEvent(monthlyNet - (strat?.monthlyPayment ?? 0), scoreDelta + 2, 18);
       toast(messages[0], { description: messages[1] ?? "Mês tranquilo. Saldo atualizado." });
@@ -130,9 +161,19 @@ export const GameWorld = () => {
     }
   };
 
+  const handleMiniGameClose = (won: boolean) => {
+    if (won && miniGame) {
+      game.awardMiniGame(miniGame.reward.xp, miniGame.reward.cash, miniGame.reward.score);
+      setConfettiTrigger((t) => t + 1);
+    }
+    setMiniGame(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-hero relative">
       <AchievementWatcher />
+      <Tutorial />
+      <MiniGameModal game={miniGame} onClose={handleMiniGameClose} />
       <AcademyModal open={academyOpen} onOpenChange={setAcademyOpen} />
       <div className="relative">
         <Confetti trigger={confettiTrigger} />
@@ -141,6 +182,9 @@ export const GameWorld = () => {
       <header className="container py-3 flex items-center justify-between gap-2 border-b bg-background/70 backdrop-blur sticky top-0 z-20">
         <Logo />
         <div className="flex items-center gap-1 shrink-0">
+          <Button variant="ghost" size="sm" onClick={restartTutorial} className="px-2 sm:px-3" title="Reabrir tutorial">
+            <HelpCircle className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Tutorial</span>
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => setAcademyOpen(true)} className="px-2 sm:px-3">
             <Sparkles className="w-4 h-4 sm:mr-1.5 text-primary" /> <span className="hidden sm:inline">Academy</span>
           </Button>
@@ -297,6 +341,9 @@ export const GameWorld = () => {
               </div>
             </Card>
           )}
+
+          {/* CTA Ademicon */}
+          {isContemplated && <PostContemplationCard />}
 
           {/* CTA Ademicon */}
           <CTABanner compact />
