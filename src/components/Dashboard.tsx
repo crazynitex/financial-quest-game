@@ -59,9 +59,9 @@ export const Dashboard = () => {
             <p className="text-sm text-muted-foreground mt-1">{game.xp} XP acumulado</p>
           </Card>
           <Card className="p-6 bg-gradient-card border-2">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Meses jogados</p>
-            <div className="font-display text-4xl font-bold text-primary">{game.month}</div>
-            <p className="text-sm text-muted-foreground mt-1">{game.decisions.length} decisões tomadas</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Quiz</p>
+            <div className="font-display text-4xl font-bold text-primary">{game.totalCorrect}/{game.totalAnswered}</div>
+            <p className="text-sm text-muted-foreground mt-1">acertos • combo máx. x{game.bestCombo}</p>
           </Card>
         </div>
 

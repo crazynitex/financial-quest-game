@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import type { Character, Decision, GameState } from "./engine";
 import { supabase } from "@/integrations/supabase/client";
 
-interface GameStore extends GameState {
+interface GameStore extends GameState, QuizState {
   hydrated: boolean;
   initGame: (character: Character) => void;
   resetGame: () => void;
@@ -26,12 +26,48 @@ interface GameStore extends GameState {
   startNewCycle: () => void;
   sellAsset: (value: number) => void;
   awardMiniGame: (xp: number, cash: number, score: number) => void;
+  // Quiz Journey
+  quizCorrectAnswer: (id: string, gain: { xp: number; progress: number; cash: number }) => void;
+  quizWrongAnswer: (id: string) => void;
+  quizUseHint: () => boolean;
+  quizUseFiftyFifty: () => boolean;
+  quizRefillLives: () => void;
+  quizAdvanceChapter: () => void;
+  quizResetRun: () => void;
   loadFromCloud: (userId: string) => Promise<void>;
   saveToCloud: (userId: string) => Promise<void>;
   clearLocal: () => void;
 }
 
-const initial: GameState = {
+interface QuizState {
+  goalProgress: number; // 0..100 rumo ao bem
+  lives: number; // 0..3
+  combo: number; // acertos seguidos
+  bestCombo: number;
+  answeredIds: string[];
+  wrongIds: string[];
+  currentChapter: number; // 1..4
+  hintsLeft: number;
+  fiftyLeft: number;
+  totalAnswered: number;
+  totalCorrect: number;
+}
+
+const initialQuiz: QuizState = {
+  goalProgress: 0,
+  lives: 3,
+  combo: 0,
+  bestCombo: 0,
+  answeredIds: [],
+  wrongIds: [],
+  currentChapter: 1,
+  hintsLeft: 3,
+  fiftyLeft: 2,
+  totalAnswered: 0,
+  totalCorrect: 0,
+};
+
+const initial: GameState & QuizState = {
   character: { name: "", age: 25, income: 4000, goal: "house" },
   cash: 5000,
   savings: 0,
@@ -47,6 +83,7 @@ const initial: GameState = {
   finished: false,
   gameOver: false,
   lessonsCompleted: [],
+  ...initialQuiz,
 };
 
 export const useGame = create<GameStore>()(
@@ -194,6 +231,67 @@ export const useGame = create<GameStore>()(
           finScore: Math.min(100, s.finScore + score),
           level: Math.floor((s.xp + xp) / 100) + 1,
         })),
+      // ====== QUIZ JOURNEY ======
+      quizCorrectAnswer: (id, gain) =>
+        set((s) => {
+          const newCombo = s.combo + 1;
+          const comboMult = 1 + Math.min(0.5, (newCombo - 1) * 0.1); // até +50%
+          const xpEarned = Math.round(gain.xp * comboMult);
+          const progressEarned = gain.progress * comboMult;
+          const cashEarned = Math.round(gain.cash * comboMult);
+          const newXp = s.xp + xpEarned;
+          const newProg = Math.min(100, s.goalProgress + progressEarned);
+          const finished = newProg >= 100;
+          return {
+            combo: newCombo,
+            bestCombo: Math.max(s.bestCombo, newCombo),
+            answeredIds: [...s.answeredIds, id],
+            totalAnswered: s.totalAnswered + 1,
+            totalCorrect: s.totalCorrect + 1,
+            xp: newXp,
+            level: Math.floor(newXp / 100) + 1,
+            cash: s.cash + cashEarned,
+            finScore: Math.min(100, s.finScore + 2),
+            goalProgress: newProg,
+            finished: finished || s.finished,
+          };
+        }),
+      quizWrongAnswer: (id) =>
+        set((s) => {
+          const newLives = Math.max(0, s.lives - 1);
+          return {
+            lives: newLives,
+            combo: 0,
+            answeredIds: [...s.answeredIds, id],
+            wrongIds: [...s.wrongIds, id],
+            totalAnswered: s.totalAnswered + 1,
+            finScore: Math.max(0, s.finScore - 1),
+            gameOver: newLives <= 0,
+            gameOverReason: newLives <= 0 ? "Você perdeu todas as vidas! Estude mais sobre consórcio na Academy e tente de novo." : s.gameOverReason,
+          };
+        }),
+      quizUseHint: () => {
+        const s = get();
+        if (s.hintsLeft <= 0) return false;
+        set({ hintsLeft: s.hintsLeft - 1 });
+        return true;
+      },
+      quizUseFiftyFifty: () => {
+        const s = get();
+        if (s.fiftyLeft <= 0) return false;
+        set({ fiftyLeft: s.fiftyLeft - 1 });
+        return true;
+      },
+      quizRefillLives: () =>
+        set((s) => ({ lives: Math.min(3, s.lives + 1) })),
+      quizAdvanceChapter: () =>
+        set((s) => ({
+          currentChapter: Math.min(4, s.currentChapter + 1),
+          hintsLeft: Math.min(3, s.hintsLeft + 1),
+          fiftyLeft: Math.min(2, s.fiftyLeft + 1),
+        })),
+      quizResetRun: () =>
+        set({ ...initialQuiz, finished: false, gameOver: false, gameOverReason: undefined }),
       loadFromCloud: async (userId) => {
         const { data, error } = await supabase
           .from("game_saves")

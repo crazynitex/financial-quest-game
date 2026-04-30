@@ -4,16 +4,17 @@ import { Card } from "@/components/ui/card";
 import { Logo } from "./Logo";
 import { UserMenu } from "./UserMenu";
 import { CTABanner } from "./CTABanner";
-import { RotateCcw, AlertTriangle, BookOpen } from "lucide-react";
+import { RotateCcw, AlertTriangle, BookOpen, Sparkles } from "lucide-react";
 
 export const GameOverScreen = () => {
-  const { gameOverReason, decisions, finScore, month, resetGame } = useGame();
+  const { gameOverReason, totalAnswered, totalCorrect, bestCombo, goalProgress, quizResetRun } = useGame();
+  const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
 
   const lessons = [
-    "Reserva de emergência (3-6 meses) protege contra imprevistos.",
-    "Cortar gastos supérfluos cedo evita o efeito bola de neve.",
-    "Renda extra (freela, side hustle) acelera qualquer estratégia.",
-    "Avalie o CET antes de assumir parcelas longas.",
+    "Use a Academy para revisar os fundamentos antes de tentar de novo.",
+    "Power-ups (Dica e 50/50) são valiosos em perguntas difíceis.",
+    "Mantenha o combo: cada acerto seguido aumenta as recompensas em 10%.",
+    "Pergunte ao Mentor IA quando travar — ele explica qualquer conceito.",
   ];
 
   return (
@@ -30,33 +31,37 @@ export const GameOverScreen = () => {
           </div>
           <h1 className="font-display text-4xl font-bold mb-2">Game Over</h1>
           <p className="text-lg text-muted-foreground">
-            {gameOverReason ?? "Sua jornada terminou."}
+            {gameOverReason ?? "Você perdeu todas as vidas."}
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-3 mb-6">
+        <div className="grid sm:grid-cols-4 gap-3 mb-6">
           <Card className="p-4 bg-gradient-card border-2 text-center">
-            <p className="text-xs uppercase text-muted-foreground">Meses</p>
-            <p className="font-display text-3xl font-bold text-primary">{month}</p>
+            <p className="text-xs uppercase text-muted-foreground">Acertos</p>
+            <p className="font-display text-3xl font-bold text-primary">{accuracy}%</p>
           </Card>
           <Card className="p-4 bg-gradient-card border-2 text-center">
-            <p className="text-xs uppercase text-muted-foreground">Score Final</p>
-            <p className="font-display text-3xl font-bold text-primary">{finScore}/100</p>
+            <p className="text-xs uppercase text-muted-foreground">Respondidas</p>
+            <p className="font-display text-3xl font-bold text-primary">{totalAnswered}</p>
           </Card>
           <Card className="p-4 bg-gradient-card border-2 text-center">
-            <p className="text-xs uppercase text-muted-foreground">Decisões</p>
-            <p className="font-display text-3xl font-bold text-primary">{decisions.length}</p>
+            <p className="text-xs uppercase text-muted-foreground">Maior combo</p>
+            <p className="font-display text-3xl font-bold text-primary">x{bestCombo}</p>
+          </Card>
+          <Card className="p-4 bg-gradient-card border-2 text-center">
+            <p className="text-xs uppercase text-muted-foreground">Progresso</p>
+            <p className="font-display text-3xl font-bold text-primary">{Math.round(goalProgress)}%</p>
           </Card>
         </div>
 
         <Card className="p-6 bg-gradient-card border-2 mb-6">
           <h3 className="font-display font-bold text-lg flex items-center gap-2 mb-3">
-            <BookOpen className="w-5 h-5 text-primary" /> O que aprender com isso
+            <BookOpen className="w-5 h-5 text-primary" /> Como vencer da próxima
           </h3>
           <ul className="space-y-2 text-sm">
             {lessons.map((l, i) => (
               <li key={i} className="flex gap-2">
-                <span className="text-primary">→</span>
+                <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <span>{l}</span>
               </li>
             ))}
@@ -66,7 +71,7 @@ export const GameOverScreen = () => {
         <CTABanner />
 
         <div className="text-center mt-8">
-          <Button size="lg" onClick={resetGame} className="bg-gradient-primary h-14 px-8 shadow-elegant">
+          <Button size="lg" onClick={quizResetRun} className="bg-gradient-primary h-14 px-8 shadow-elegant">
             <RotateCcw className="w-5 h-5 mr-2" /> Recomeçar a jornada
           </Button>
         </div>
