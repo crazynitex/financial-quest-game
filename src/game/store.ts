@@ -231,6 +231,67 @@ export const useGame = create<GameStore>()(
           finScore: Math.min(100, s.finScore + score),
           level: Math.floor((s.xp + xp) / 100) + 1,
         })),
+      // ====== QUIZ JOURNEY ======
+      quizCorrectAnswer: (id, gain) =>
+        set((s) => {
+          const newCombo = s.combo + 1;
+          const comboMult = 1 + Math.min(0.5, (newCombo - 1) * 0.1); // até +50%
+          const xpEarned = Math.round(gain.xp * comboMult);
+          const progressEarned = gain.progress * comboMult;
+          const cashEarned = Math.round(gain.cash * comboMult);
+          const newXp = s.xp + xpEarned;
+          const newProg = Math.min(100, s.goalProgress + progressEarned);
+          const finished = newProg >= 100;
+          return {
+            combo: newCombo,
+            bestCombo: Math.max(s.bestCombo, newCombo),
+            answeredIds: [...s.answeredIds, id],
+            totalAnswered: s.totalAnswered + 1,
+            totalCorrect: s.totalCorrect + 1,
+            xp: newXp,
+            level: Math.floor(newXp / 100) + 1,
+            cash: s.cash + cashEarned,
+            finScore: Math.min(100, s.finScore + 2),
+            goalProgress: newProg,
+            finished: finished || s.finished,
+          };
+        }),
+      quizWrongAnswer: (id) =>
+        set((s) => {
+          const newLives = Math.max(0, s.lives - 1);
+          return {
+            lives: newLives,
+            combo: 0,
+            answeredIds: [...s.answeredIds, id],
+            wrongIds: [...s.wrongIds, id],
+            totalAnswered: s.totalAnswered + 1,
+            finScore: Math.max(0, s.finScore - 1),
+            gameOver: newLives <= 0,
+            gameOverReason: newLives <= 0 ? "Você perdeu todas as vidas! Estude mais sobre consórcio na Academy e tente de novo." : s.gameOverReason,
+          };
+        }),
+      quizUseHint: () => {
+        const s = get();
+        if (s.hintsLeft <= 0) return false;
+        set({ hintsLeft: s.hintsLeft - 1 });
+        return true;
+      },
+      quizUseFiftyFifty: () => {
+        const s = get();
+        if (s.fiftyLeft <= 0) return false;
+        set({ fiftyLeft: s.fiftyLeft - 1 });
+        return true;
+      },
+      quizRefillLives: () =>
+        set((s) => ({ lives: Math.min(3, s.lives + 1) })),
+      quizAdvanceChapter: () =>
+        set((s) => ({
+          currentChapter: Math.min(4, s.currentChapter + 1),
+          hintsLeft: Math.min(3, s.hintsLeft + 1),
+          fiftyLeft: Math.min(2, s.fiftyLeft + 1),
+        })),
+      quizResetRun: () =>
+        set({ ...initialQuiz, finished: false, gameOver: false, gameOverReason: undefined }),
       loadFromCloud: async (userId) => {
         const { data, error } = await supabase
           .from("game_saves")
