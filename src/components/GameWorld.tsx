@@ -77,7 +77,16 @@ export const GameWorld = () => {
   const unlockedAchievements = ACHIEVEMENTS.filter((a) => game.achievements.includes(a.id));
   const monthlyNet = game.character.income - game.monthlyExpenses;
 
-  const triggerEvent = () => setCurrentEvent(pickRandomEvent());
+  const isContemplated = !!game.strategyData?.contemplated;
+  const triggerEvent = () => {
+    // Pós-contemplação tem eventos próprios mais ricos
+    if (isContemplated && Math.random() < 0.55) {
+      setCurrentEvent(pickRandomPostEvent() as any);
+    } else {
+      setCurrentEvent(pickRandomEvent());
+    }
+  };
+  const triggerMiniGame = () => setMiniGame(pickRandomMiniGame());
 
   const advanceMonth = () => {
     // 1. Aplicar fluxo mensal real: renda - despesas
@@ -137,16 +146,27 @@ export const GameWorld = () => {
       setZeroMonths(0);
     }
 
-    // 4. Evento aleatório (60% chance) ou mês tranquilo
-    if (Math.random() < 0.6) {
-      // aplica fluxo e mostra evento
+    // 4. Eventos: 50% evento da vida, 30% mini-game, 20% mês tranquilo
+    const roll = Math.random();
+    if (roll < 0.5) {
       game.applyEvent(monthlyNet - (strat?.monthlyPayment ?? 0), scoreDelta + 1, 15);
       triggerEvent();
+    } else if (roll < 0.8) {
+      game.applyEvent(monthlyNet - (strat?.monthlyPayment ?? 0), scoreDelta + 1, 15);
+      triggerMiniGame();
     } else {
       game.applyEvent(monthlyNet - (strat?.monthlyPayment ?? 0), scoreDelta + 2, 18);
       toast(messages[0], { description: messages[1] ?? "Mês tranquilo. Saldo atualizado." });
       setTipTrigger((t) => t + 1);
     }
+  };
+
+  const handleMiniGameClose = (won: boolean) => {
+    if (won && miniGame) {
+      game.awardMiniGame(miniGame.reward.xp, miniGame.reward.cash, miniGame.reward.score);
+      setConfettiTrigger((t) => t + 1);
+    }
+    setMiniGame(null);
   };
 
   return (
