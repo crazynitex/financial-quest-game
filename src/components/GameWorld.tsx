@@ -172,6 +172,8 @@ export const GameWorld = () => {
   return (
     <div className="min-h-screen bg-gradient-hero relative">
       <AchievementWatcher />
+      <Tutorial />
+      <MiniGameModal game={miniGame} onClose={handleMiniGameClose} />
       <AcademyModal open={academyOpen} onOpenChange={setAcademyOpen} />
       <div className="relative">
         <Confetti trigger={confettiTrigger} />
@@ -180,6 +182,9 @@ export const GameWorld = () => {
       <header className="container py-3 flex items-center justify-between gap-2 border-b bg-background/70 backdrop-blur sticky top-0 z-20">
         <Logo />
         <div className="flex items-center gap-1 shrink-0">
+          <Button variant="ghost" size="sm" onClick={restartTutorial} className="px-2 sm:px-3" title="Reabrir tutorial">
+            <HelpCircle className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Tutorial</span>
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => setAcademyOpen(true)} className="px-2 sm:px-3">
             <Sparkles className="w-4 h-4 sm:mr-1.5 text-primary" /> <span className="hidden sm:inline">Academy</span>
           </Button>
