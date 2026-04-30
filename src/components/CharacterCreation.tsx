@@ -173,11 +173,7 @@ export const CharacterCreation = () => {
                           : "border-border hover:border-primary/40 hover:-translate-y-0.5"
                       }`}
                     >
-                      {g === "house" || g === "car" || g === "moto" || g === "motorcycle" ? (
-                        <img src={goalIcons[g]} alt={GOAL_INFO[g].label} className="w-9 h-9 sm:w-12 sm:h-12 object-contain" loading="lazy" />
-                      ) : (
-                        <img src={goalIcons[g]} alt={GOAL_INFO[g].label} className="w-9 h-9 sm:w-12 sm:h-12 object-contain" loading="lazy" />
-                      )}
+                      <img src={goalIcons[g]} alt={GOAL_INFO[g].label} className="w-9 h-9 sm:w-12 sm:h-12 object-contain" loading="lazy" />
                       <span className="text-[11px] sm:text-xs font-semibold text-center leading-tight">{GOAL_INFO[g].label}</span>
                       <span className="text-[10px] text-muted-foreground tabular-nums">{formatBRL(GOAL_INFO[g].value)}</span>
                     </button>
