@@ -47,6 +47,19 @@ export const GameWorld = () => {
     }
   }, [game.cash, prevCash]);
 
+  // Detecta contemplação para confete
+  useEffect(() => {
+    const isContemplated = !!game.strategyData?.contemplated;
+    if (isContemplated && !prevContemplated) {
+      setConfettiTrigger((t) => t + 1);
+      toast.success("🎊 CONTEMPLADO! Sua carta de crédito está liberada!", {
+        description: "Agora gerencie seu novo bem ou comece outro ciclo.",
+        duration: 6000,
+      });
+    }
+    setPrevContemplated(isContemplated);
+  }, [game.strategyData?.contemplated, prevContemplated]);
+
   if (game.gameOver) return <GameOverScreen />;
   if (game.finished) return <Dashboard />;
 
