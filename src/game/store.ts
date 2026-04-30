@@ -26,10 +26,46 @@ interface GameStore extends GameState {
   startNewCycle: () => void;
   sellAsset: (value: number) => void;
   awardMiniGame: (xp: number, cash: number, score: number) => void;
+  // Quiz Journey
+  quizCorrectAnswer: (id: string, gain: { xp: number; progress: number; cash: number }) => void;
+  quizWrongAnswer: (id: string) => void;
+  quizUseHint: () => boolean;
+  quizUseFiftyFifty: () => boolean;
+  quizRefillLives: () => void;
+  quizAdvanceChapter: () => void;
+  quizResetRun: () => void;
   loadFromCloud: (userId: string) => Promise<void>;
   saveToCloud: (userId: string) => Promise<void>;
   clearLocal: () => void;
 }
+
+interface QuizState {
+  goalProgress: number; // 0..100 rumo ao bem
+  lives: number; // 0..3
+  combo: number; // acertos seguidos
+  bestCombo: number;
+  answeredIds: string[];
+  wrongIds: string[];
+  currentChapter: number; // 1..4
+  hintsLeft: number;
+  fiftyLeft: number;
+  totalAnswered: number;
+  totalCorrect: number;
+}
+
+const initialQuiz: QuizState = {
+  goalProgress: 0,
+  lives: 3,
+  combo: 0,
+  bestCombo: 0,
+  answeredIds: [],
+  wrongIds: [],
+  currentChapter: 1,
+  hintsLeft: 3,
+  fiftyLeft: 2,
+  totalAnswered: 0,
+  totalCorrect: 0,
+};
 
 const initial: GameState = {
   character: { name: "", age: 25, income: 4000, goal: "house" },
