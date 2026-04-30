@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGame } from "@/game/store";
-import { GOAL_INFO, pickRandomEvent, ACHIEVEMENTS, type LifeEvent } from "@/game/engine";
+import { GOAL_INFO, pickRandomEvent, ACHIEVEMENTS, pickRandomMiniGame, pickRandomPostEvent, type LifeEvent, type MiniGame, type PostEvent } from "@/game/engine";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -12,25 +12,31 @@ import { GameOverScreen } from "./GameOverScreen";
 import { AcademyModal } from "./AcademyModal";
 import { ActionsPanel } from "./ActionsPanel";
 import { CTABanner } from "./CTABanner";
-import { Wallet, TrendingUp, Trophy, Calendar, Sparkles, Award, ArrowUp, ArrowDown, Zap, Receipt, PiggyBank } from "lucide-react";
+import { Tutorial } from "./Tutorial";
+import { MiniGameModal } from "./MiniGameModal";
+import { PostContemplationCard } from "./PostContemplationCard";
+import { Wallet, TrendingUp, Trophy, Calendar, Sparkles, Award, ArrowUp, ArrowDown, Zap, Receipt, PiggyBank, HelpCircle } from "lucide-react";
 import { UserMenu } from "./UserMenu";
 import { toast } from "sonner";
 import { FinTipCard } from "./FinTipCard";
 import { Confetti } from "./Confetti";
 import { AchievementWatcher } from "./AchievementToast";
+import { restartTutorial } from "./Tutorial";
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
 export const GameWorld = () => {
   const game = useGame();
-  const [currentEvent, setCurrentEvent] = useState<LifeEvent | null>(null);
+  const [currentEvent, setCurrentEvent] = useState<LifeEvent | PostEvent | null>(null);
   const [tipTrigger, setTipTrigger] = useState(0);
   const [confettiTrigger, setConfettiTrigger] = useState(0);
   const [cashFlash, setCashFlash] = useState<"up" | "down" | null>(null);
   const [prevCash, setPrevCash] = useState(game.cash);
   const [academyOpen, setAcademyOpen] = useState(false);
   const [zeroMonths, setZeroMonths] = useState(0);
+  const [miniGame, setMiniGame] = useState<MiniGame | null>(null);
+  const [prevContemplated, setPrevContemplated] = useState(!!game.strategyData?.contemplated);
 
   useEffect(() => {
     if (game.cash !== prevCash) {
