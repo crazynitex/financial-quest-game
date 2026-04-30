@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import type { Character, Decision, GameState } from "./engine";
 import { supabase } from "@/integrations/supabase/client";
 
-interface GameStore extends GameState {
+interface GameStore extends GameState, QuizState {
   hydrated: boolean;
   initGame: (character: Character) => void;
   resetGame: () => void;
@@ -67,7 +67,7 @@ const initialQuiz: QuizState = {
   totalCorrect: 0,
 };
 
-const initial: GameState = {
+const initial: GameState & QuizState = {
   character: { name: "", age: 25, income: 4000, goal: "house" },
   cash: 5000,
   savings: 0,
@@ -83,6 +83,7 @@ const initial: GameState = {
   finished: false,
   gameOver: false,
   lessonsCompleted: [],
+  ...initialQuiz,
 };
 
 export const useGame = create<GameStore>()(
