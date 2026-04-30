@@ -343,6 +343,9 @@ export const GameWorld = () => {
           )}
 
           {/* CTA Ademicon */}
+          {isContemplated && <PostContemplationCard />}
+
+          {/* CTA Ademicon */}
           <CTABanner compact />
 
           {/* Event modal */}
