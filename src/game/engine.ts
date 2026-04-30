@@ -1,4 +1,4 @@
-export type GoalType = "house" | "car" | "travel";
+export type GoalType = "house" | "car" | "motorcycle" | "travel";
 
 export interface Character {
   name: string;
@@ -149,8 +149,132 @@ export interface EventOption {
 export const GOAL_INFO: Record<GoalType, { label: string; value: number; emoji: string }> = {
   house: { label: "Casa Própria", value: 250000, emoji: "🏠" },
   car: { label: "Carro Novo", value: 80000, emoji: "🚗" },
+  motorcycle: { label: "Moto Nova", value: 22000, emoji: "🏍️" },
   travel: { label: "Viagem dos Sonhos", value: 25000, emoji: "✈️" },
 };
+
+// ====== MINI-GAMES (quizzes rápidos no fim de cada mês) ======
+export interface MiniGame {
+  id: string;
+  emoji: string;
+  question: string;
+  options: { label: string; correct: boolean; explain: string }[];
+  reward: { xp: number; cash: number; score: number };
+}
+
+export const MINI_GAMES: MiniGame[] = [
+  {
+    id: "mg1", emoji: "💰",
+    question: "Qual rende mais ao longo de 10 anos?",
+    options: [
+      { label: "Poupança (0,5%/mês)", correct: false, explain: "Poupança perde até para a inflação em muitos anos." },
+      { label: "Tesouro Selic (~1%/mês)", correct: true, explain: "Selic acumula quase o dobro em 10 anos com mesma segurança." },
+      { label: "Dinheiro embaixo do colchão", correct: false, explain: "Inflação corrói 100% do poder de compra." },
+    ],
+    reward: { xp: 40, cash: 200, score: 4 },
+  },
+  {
+    id: "mg2", emoji: "🎯",
+    question: "Carta de R$ 80.000 contemplada. Onde tem mais poder?",
+    options: [
+      { label: "Negociar à vista com desconto", correct: true, explain: "Pagamento à vista garante 5–15% de desconto. Pura vantagem." },
+      { label: "Pagar parcelado mesmo assim", correct: false, explain: "Você perde o poder da carta como dinheiro à vista." },
+    ],
+    reward: { xp: 50, cash: 400, score: 6 },
+  },
+  {
+    id: "mg3", emoji: "📊",
+    question: "Sua parcela ideal não passa de quantos % da renda?",
+    options: [
+      { label: "30%", correct: true, explain: "Acima disso compromete reserva e qualidade de vida." },
+      { label: "60%", correct: false, explain: "Sufoca o orçamento. Inadimplência iminente." },
+      { label: "10%", correct: false, explain: "Seguro, mas pode te fazer perder oportunidades." },
+    ],
+    reward: { xp: 35, cash: 150, score: 3 },
+  },
+  {
+    id: "mg4", emoji: "🤝",
+    question: "Diferença entre lance livre e embutido?",
+    options: [
+      { label: "Livre = você paga; embutido = vem da carta", correct: true, explain: "Embutido usa parte do crédito como lance. Livre é desembolso seu." },
+      { label: "São a mesma coisa", correct: false, explain: "Diferentes. Embutido reduz a carta efetiva recebida." },
+    ],
+    reward: { xp: 45, cash: 250, score: 5 },
+  },
+  {
+    id: "mg5", emoji: "⚠️",
+    question: "Uma 'oportunidade' garante 8% ao mês. O que fazer?",
+    options: [
+      { label: "Investir tudo agora!", correct: false, explain: "Promessa fixa alta = pirâmide. Você perde o capital." },
+      { label: "Ignorar — é golpe", correct: true, explain: "Nada legal garante 8% a.m. fixos. Sempre desconfie." },
+    ],
+    reward: { xp: 60, cash: 500, score: 8 },
+  },
+  {
+    id: "mg6", emoji: "🧮",
+    question: "Financiamento 60x a 1,8% a.m. para R$ 80k. Qual o custo total aproximado?",
+    options: [
+      { label: "~R$ 80.000", correct: false, explain: "Sem juros! Seria à vista." },
+      { label: "~R$ 140.000", correct: true, explain: "Juros compostos quase dobram o valor do bem." },
+      { label: "~R$ 200.000", correct: false, explain: "Próximo, mas o cálculo dá ~140k." },
+    ],
+    reward: { xp: 55, cash: 350, score: 6 },
+  },
+];
+
+export function pickRandomMiniGame(seed?: number): MiniGame {
+  const i = seed != null ? seed % MINI_GAMES.length : Math.floor(Math.random() * MINI_GAMES.length);
+  return MINI_GAMES[i];
+}
+
+// ====== POST-CONTEMPLAÇÃO: jornada do bem ======
+export interface PostEvent {
+  id: string;
+  emoji: string;
+  title: string;
+  description: string;
+  options: EventOption[];
+}
+
+export const POST_EVENTS: PostEvent[] = [
+  {
+    id: "pe1", emoji: "🛠️", title: "Manutenção preventiva",
+    description: "Chegou a hora da revisão. Manutenção preserva o valor do bem.",
+    options: [
+      { label: "Fazer revisão completa (R$ 800)", cashImpact: -800, scoreImpact: 8, xpGain: 40, feedback: "Manutenção em dia evita custos enormes depois!", type: "good" },
+      { label: "Adiar mais um mês", cashImpact: 0, scoreImpact: -4, xpGain: 5, feedback: "Adiar manutenção pode multiplicar o custo futuro.", type: "bad" },
+    ],
+  },
+  {
+    id: "pe2", emoji: "💼", title: "Monetizar o bem",
+    description: "Você pode usar o bem para gerar renda extra.",
+    options: [
+      { label: "Alugar/usar profissionalmente (+R$ 1.500)", cashImpact: 1500, scoreImpact: 10, xpGain: 50, feedback: "Bem que gera renda é bem que se paga sozinho!", type: "good" },
+      { label: "Manter só para uso pessoal", cashImpact: 0, scoreImpact: 2, xpGain: 15, feedback: "Conforto também é válido.", type: "neutral" },
+    ],
+  },
+  {
+    id: "pe3", emoji: "📈", title: "Valorização & próximo passo",
+    description: "Seu patrimônio cresceu. Próxima meta?",
+    options: [
+      { label: "Iniciar novo consórcio (escala patrimônio)", cashImpact: 0, scoreImpact: 12, xpGain: 60, feedback: "Patrimônio em escala: a fórmula da independência financeira.", type: "good" },
+      { label: "Investir o caixa em renda fixa", cashImpact: 0, scoreImpact: 8, xpGain: 40, feedback: "Diversificar sempre é inteligente.", type: "good" },
+      { label: "Gastar com supérfluos", cashImpact: -2000, scoreImpact: -8, xpGain: 5, feedback: "Lifestyle inflation derrubou muita gente.", type: "bad" },
+    ],
+  },
+  {
+    id: "pe4", emoji: "🛡️", title: "Seguro do bem",
+    description: "Seguro custa, mas protege patrimônio.",
+    options: [
+      { label: "Contratar seguro (R$ 1.200/ano)", cashImpact: -1200, scoreImpact: 6, xpGain: 35, feedback: "Proteção patrimonial é parte de boa gestão.", type: "good" },
+      { label: "Andar sem seguro", cashImpact: 0, scoreImpact: -6, xpGain: 5, feedback: "Risco alto. Um sinistro pode te zerar.", type: "bad" },
+    ],
+  },
+];
+
+export function pickRandomPostEvent(): PostEvent {
+  return POST_EVENTS[Math.floor(Math.random() * POST_EVENTS.length)];
+}
 
 // Simulações financeiras realistas (baseadas em mercado)
 export function simulateFinancing(target: number, months = 60) {
