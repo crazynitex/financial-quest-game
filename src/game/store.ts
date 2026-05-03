@@ -304,10 +304,9 @@ export const useGame = create<GameStore>()(
         if (s.cash < COST) return false;
         if (s.currentChapter >= 4) return false;
         // marca todas as perguntas restantes do capítulo como respondidas (sem ganho)
-        const { QUIZ_BANK } = require("@/game/quizBank");
         const remaining = QUIZ_BANK
-          .filter((q: any) => q.chapter === s.currentChapter && !s.answeredIds.includes(q.id))
-          .map((q: any) => q.id);
+          .filter((q) => q.chapter === s.currentChapter && !s.answeredIds.includes(q.id))
+          .map((q) => q.id);
         set({
           skipChapterLeft: s.skipChapterLeft - 1,
           cash: s.cash - COST,
