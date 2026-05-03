@@ -5,7 +5,7 @@ import { GOAL_INFO } from "@/game/engine";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Heart, Zap, Lightbulb, Scissors, Sparkles, Check, X, ArrowRight, Trophy, Flame, BookOpen, Timer, AlertTriangle, FastForward } from "lucide-react";
+import { Heart, Zap, Lightbulb, Scissors, Sparkles, Check, X, ArrowRight, Trophy, Flame, BookOpen, AlertTriangle, FastForward } from "lucide-react";
 import { toast } from "sonner";
 import { Confetti } from "./Confetti";
 import { MentorFollowup } from "./MentorFollowup";
@@ -25,7 +25,6 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
   const [eliminated, setEliminated] = useState<number[]>([]);
   const [trapRevealed, setTrapRevealed] = useState<number | null>(null);
   const [confetti, setConfetti] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(20);
   const [chapterTransition, setChapterTransition] = useState<number | null>(null);
 
   // Próxima pergunta: do capítulo atual, ainda não respondida
@@ -43,20 +42,7 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
     setHintShown(false);
     setEliminated([]);
     setTrapRevealed(null);
-    setTimeLeft(currentQuestion?.difficulty === "boss" ? 30 : 20);
   }, [currentQuestion?.id]);
-
-  // Timer countdown
-  useEffect(() => {
-    if (!currentQuestion || picked != null) return;
-    if (timeLeft <= 0) {
-      // tempo esgotado = errada
-      handlePick(-1);
-      return;
-    }
-    const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [timeLeft, picked, currentQuestion]);
 
   // Detecta fim de capítulo
   useEffect(() => {
@@ -298,10 +284,8 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
               <Zap className="w-2.5 h-2.5" /> +{r.xp} XP • +{r.progress}%
             </span>
           </div>
-          <div className={`flex items-center gap-1 text-sm font-bold tabular-nums ${timeLeft <= 5 ? "text-destructive animate-pulse" : "text-muted-foreground"}`}>
-            <Timer className="w-4 h-4" /> {timeLeft}s
-          </div>
         </div>
+
 
         <div className="flex items-start gap-3 mb-4">
           <span className="text-4xl sm:text-5xl animate-float inline-block">{q.emoji}</span>
