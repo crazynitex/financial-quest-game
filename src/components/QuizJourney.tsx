@@ -5,9 +5,10 @@ import { GOAL_INFO } from "@/game/engine";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Heart, Zap, Lightbulb, Scissors, Sparkles, Check, X, ArrowRight, Trophy, Flame, BookOpen, Timer } from "lucide-react";
+import { Heart, Zap, Lightbulb, Scissors, Sparkles, Check, X, ArrowRight, Trophy, Flame, BookOpen, Timer, AlertTriangle, FastForward } from "lucide-react";
 import { toast } from "sonner";
 import { Confetti } from "./Confetti";
+import { MentorFollowup } from "./MentorFollowup";
 
 const formatBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
