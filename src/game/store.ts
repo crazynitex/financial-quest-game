@@ -288,6 +288,33 @@ export const useGame = create<GameStore>()(
         set({ fiftyLeft: s.fiftyLeft - 1 });
         return true;
       },
+      quizUseRevealTrap: () => {
+        const s = get();
+        const COST = 300;
+        if (s.revealTrapLeft <= 0) return false;
+        if (s.cash < COST) return false;
+        set({ revealTrapLeft: s.revealTrapLeft - 1, cash: s.cash - COST });
+        return true;
+      },
+      quizUseSkipChapter: () => {
+        const s = get();
+        const COST = 1500;
+        if (s.skipChapterLeft <= 0) return false;
+        if (s.cash < COST) return false;
+        if (s.currentChapter >= 4) return false;
+        // marca todas as perguntas restantes do capítulo como respondidas (sem ganho)
+        const { QUIZ_BANK } = require("@/game/quizBank");
+        const remaining = QUIZ_BANK
+          .filter((q: any) => q.chapter === s.currentChapter && !s.answeredIds.includes(q.id))
+          .map((q: any) => q.id);
+        set({
+          skipChapterLeft: s.skipChapterLeft - 1,
+          cash: s.cash - COST,
+          answeredIds: [...s.answeredIds, ...remaining],
+          combo: 0,
+        });
+        return true;
+      },
       quizRefillLives: () =>
         set((s) => ({ lives: Math.min(3, s.lives + 1) })),
       quizAdvanceChapter: () =>
