@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Character, Decision, GameState } from "./engine";
+import { QUIZ_BANK } from "./quizBank";
 import { supabase } from "@/integrations/supabase/client";
 
 interface GameStore extends GameState, QuizState {
