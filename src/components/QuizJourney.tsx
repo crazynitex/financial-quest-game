@@ -284,10 +284,8 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
               <Zap className="w-2.5 h-2.5" /> +{r.xp} XP • +{r.progress}%
             </span>
           </div>
-          <div className={`flex items-center gap-1 text-sm font-bold tabular-nums ${timeLeft <= 5 ? "text-destructive animate-pulse" : "text-muted-foreground"}`}>
-            <Timer className="w-4 h-4" /> {timeLeft}s
-          </div>
         </div>
+
 
         <div className="flex items-start gap-3 mb-4">
           <span className="text-4xl sm:text-5xl animate-float inline-block">{q.emoji}</span>
