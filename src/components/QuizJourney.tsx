@@ -42,6 +42,7 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
     setPicked(null);
     setHintShown(false);
     setEliminated([]);
+    setTrapRevealed(null);
     setTimeLeft(currentQuestion?.difficulty === "boss" ? 30 : 20);
   }, [currentQuestion?.id]);
 
