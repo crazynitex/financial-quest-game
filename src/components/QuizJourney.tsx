@@ -194,6 +194,8 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
       toast.error("Não foi possível pular este capítulo.");
     }
   };
+
+  const chapter = CHAPTERS.find((c) => c.id === q.chapter)!;
   const diffLabel = { easy: "Fácil", medium: "Médio", hard: "Difícil", boss: "BOSS" }[q.difficulty];
   const diffColor = {
     easy: "bg-success/15 text-success",
