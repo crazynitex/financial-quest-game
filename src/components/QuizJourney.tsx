@@ -23,6 +23,7 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
   const [picked, setPicked] = useState<number | null>(null);
   const [hintShown, setHintShown] = useState(false);
   const [eliminated, setEliminated] = useState<number[]>([]);
+  const [trapRevealed, setTrapRevealed] = useState<number | null>(null);
   const [confetti, setConfetti] = useState(0);
   const [timeLeft, setTimeLeft] = useState(20);
   const [chapterTransition, setChapterTransition] = useState<number | null>(null);
