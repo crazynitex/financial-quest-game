@@ -25,7 +25,6 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
   const [eliminated, setEliminated] = useState<number[]>([]);
   const [trapRevealed, setTrapRevealed] = useState<number | null>(null);
   const [confetti, setConfetti] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(20);
   const [chapterTransition, setChapterTransition] = useState<number | null>(null);
 
   // Próxima pergunta: do capítulo atual, ainda não respondida
@@ -43,20 +42,7 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
     setHintShown(false);
     setEliminated([]);
     setTrapRevealed(null);
-    setTimeLeft(currentQuestion?.difficulty === "boss" ? 30 : 20);
   }, [currentQuestion?.id]);
-
-  // Timer countdown
-  useEffect(() => {
-    if (!currentQuestion || picked != null) return;
-    if (timeLeft <= 0) {
-      // tempo esgotado = errada
-      handlePick(-1);
-      return;
-    }
-    const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [timeLeft, picked, currentQuestion]);
 
   // Detecta fim de capítulo
   useEffect(() => {
