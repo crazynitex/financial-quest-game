@@ -448,6 +448,15 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
             </Button>
           </Card>
         )}
+
+        {showResult && (
+          <MentorFollowup
+            key={q.id}
+            question={q}
+            pickedIdx={picked ?? -1}
+            isCorrect={isCorrect}
+          />
+        )}
       </Card>
     </div>
   );
