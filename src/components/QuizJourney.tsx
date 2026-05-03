@@ -158,7 +158,42 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
     }
   };
 
-  const chapter = CHAPTERS.find((c) => c.id === q.chapter)!;
+  const handleRevealTrap = () => {
+    if (trapRevealed != null) return;
+    // identifica a opção errada mais "atraente" (a primeira não-correta não eliminada)
+    const trapIdx = q.options.findIndex((o, i) => !o.correct && !eliminated.includes(i));
+    if (trapIdx < 0) {
+      toast.info("Nada para revelar aqui.");
+      return;
+    }
+    if (game.cash < 300) {
+      toast.error("Sem saldo (R$ 300) para revelar a pegadinha.");
+      return;
+    }
+    if (game.quizUseRevealTrap()) {
+      setTrapRevealed(trapIdx);
+      toast.success("🕵️ Pegadinha revelada!", { description: "Cuidado com essa alternativa." });
+    } else {
+      toast.error("Sem usos restantes deste power-up.");
+    }
+  };
+
+  const handleSkipChapter = () => {
+    if (game.currentChapter >= 4) {
+      toast.error("Você já está no último capítulo.");
+      return;
+    }
+    if (game.cash < 1500) {
+      toast.error("Sem saldo (R$ 1.500) para trocar de capítulo.");
+      return;
+    }
+    if (!confirm(`Trocar de capítulo custa R$ 1.500 e marca as perguntas restantes como puladas (sem XP). Confirmar?`)) return;
+    if (game.quizUseSkipChapter()) {
+      toast.success("⏭️ Capítulo pulado!");
+    } else {
+      toast.error("Não foi possível pular este capítulo.");
+    }
+  };
   const diffLabel = { easy: "Fácil", medium: "Médio", hard: "Difícil", boss: "BOSS" }[q.difficulty];
   const diffColor = {
     easy: "bg-success/15 text-success",
