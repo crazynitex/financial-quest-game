@@ -312,13 +312,13 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
 
         {/* Power-ups */}
         {!showResult && (
-          <div className="flex gap-2 mb-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 mb-3">
             <Button
               variant="outline"
               size="sm"
               onClick={handleHint}
               disabled={hintShown || game.hintsLeft <= 0}
-              className="text-xs flex-1"
+              className="text-[11px] sm:text-xs h-9"
             >
               <Lightbulb className="w-3.5 h-3.5 mr-1 text-warning" /> Dica ({game.hintsLeft})
             </Button>
@@ -327,11 +327,31 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
               size="sm"
               onClick={handleFifty}
               disabled={eliminated.length > 0 || game.fiftyLeft <= 0 || q.options.length <= 2}
-              className="text-xs flex-1"
+              className="text-[11px] sm:text-xs h-9"
             >
               <Scissors className="w-3.5 h-3.5 mr-1 text-primary" /> 50/50 ({game.fiftyLeft})
             </Button>
-            <Button variant="outline" size="sm" onClick={onOpenAcademy} className="text-xs flex-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRevealTrap}
+              disabled={trapRevealed != null || game.revealTrapLeft <= 0 || game.cash < 300}
+              className="text-[11px] sm:text-xs h-9"
+              title="Custa R$ 300 — destaca a alternativa-pegadinha"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 mr-1 text-destructive" /> Pegadinha ({game.revealTrapLeft})
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSkipChapter}
+              disabled={game.skipChapterLeft <= 0 || game.cash < 1500 || game.currentChapter >= 4}
+              className="text-[11px] sm:text-xs h-9"
+              title="Custa R$ 1.500 — pula para o próximo capítulo"
+            >
+              <FastForward className="w-3.5 h-3.5 mr-1 text-primary" /> Pular Cap ({game.skipChapterLeft})
+            </Button>
+            <Button variant="outline" size="sm" onClick={onOpenAcademy} className="text-[11px] sm:text-xs h-9 col-span-2 sm:col-span-1">
               <BookOpen className="w-3.5 h-3.5 mr-1" /> Estudar
             </Button>
           </div>
