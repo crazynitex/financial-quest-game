@@ -370,6 +370,7 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
           {q.options.map((opt, i) => {
             const isEliminated = eliminated.includes(i);
             const isPicked = picked === i;
+            const isTrap = trapRevealed === i;
             const reveal = showResult;
             return (
               <button
@@ -377,13 +378,15 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
                 disabled={showResult || isEliminated}
                 onClick={() => handlePick(i)}
                 style={{ animationDelay: `${i * 60}ms` }}
-                className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-smooth flex items-center gap-3 animate-slide-in-right ${
+                className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-smooth flex items-center gap-3 animate-slide-in-right relative ${
                   isEliminated
                     ? "opacity-30 line-through cursor-not-allowed"
                     : reveal && opt.correct
                     ? "border-success bg-success/10 animate-pop-in"
                     : reveal && isPicked && !opt.correct
                     ? "border-destructive bg-destructive/10"
+                    : isTrap && !reveal
+                    ? "border-destructive/60 bg-destructive/5 animate-wiggle"
                     : isPicked
                     ? "border-primary bg-accent"
                     : "border-border hover:border-primary/60 hover:bg-accent/40 hover:-translate-y-0.5 hover:shadow-soft"
@@ -401,6 +404,11 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
                   {String.fromCharCode(65 + i)}
                 </span>
                 <span className="text-sm font-medium flex-1">{opt.label}</span>
+                {isTrap && !reveal && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-destructive/20 text-destructive font-bold flex items-center gap-0.5">
+                    <AlertTriangle className="w-3 h-3" /> Pegadinha
+                  </span>
+                )}
                 {reveal && opt.correct && <Check className="w-5 h-5 text-success shrink-0" />}
                 {reveal && isPicked && !opt.correct && <X className="w-5 h-5 text-destructive shrink-0" />}
               </button>
