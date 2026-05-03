@@ -51,6 +51,8 @@ interface QuizState {
   currentChapter: number; // 1..4
   hintsLeft: number;
   fiftyLeft: number;
+  revealTrapLeft: number;
+  skipChapterLeft: number;
   totalAnswered: number;
   totalCorrect: number;
 }
