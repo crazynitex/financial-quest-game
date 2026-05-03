@@ -67,6 +67,8 @@ const initialQuiz: QuizState = {
   currentChapter: 1,
   hintsLeft: 3,
   fiftyLeft: 2,
+  revealTrapLeft: 2,
+  skipChapterLeft: 1,
   totalAnswered: 0,
   totalCorrect: 0,
 };
