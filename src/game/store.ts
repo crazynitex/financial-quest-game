@@ -31,6 +31,8 @@ interface GameStore extends GameState, QuizState {
   quizWrongAnswer: (id: string) => void;
   quizUseHint: () => boolean;
   quizUseFiftyFifty: () => boolean;
+  quizUseRevealTrap: () => boolean;
+  quizUseSkipChapter: () => boolean;
   quizRefillLives: () => void;
   quizAdvanceChapter: () => void;
   quizResetRun: () => void;
