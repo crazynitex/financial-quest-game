@@ -5,9 +5,10 @@ import { GOAL_INFO } from "@/game/engine";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Heart, Zap, Lightbulb, Scissors, Sparkles, Check, X, ArrowRight, Trophy, Flame, BookOpen, Timer } from "lucide-react";
+import { Heart, Zap, Lightbulb, Scissors, Sparkles, Check, X, ArrowRight, Trophy, Flame, BookOpen, Timer, AlertTriangle, FastForward } from "lucide-react";
 import { toast } from "sonner";
 import { Confetti } from "./Confetti";
+import { MentorFollowup } from "./MentorFollowup";
 
 const formatBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
@@ -22,6 +23,7 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
   const [picked, setPicked] = useState<number | null>(null);
   const [hintShown, setHintShown] = useState(false);
   const [eliminated, setEliminated] = useState<number[]>([]);
+  const [trapRevealed, setTrapRevealed] = useState<number | null>(null);
   const [confetti, setConfetti] = useState(0);
   const [timeLeft, setTimeLeft] = useState(20);
   const [chapterTransition, setChapterTransition] = useState<number | null>(null);
@@ -40,6 +42,7 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
     setPicked(null);
     setHintShown(false);
     setEliminated([]);
+    setTrapRevealed(null);
     setTimeLeft(currentQuestion?.difficulty === "boss" ? 30 : 20);
   }, [currentQuestion?.id]);
 
@@ -152,6 +155,43 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
       setEliminated(keep);
     } else {
       toast.error("Sem 50/50 restantes.");
+    }
+  };
+
+  const handleRevealTrap = () => {
+    if (trapRevealed != null) return;
+    // identifica a opção errada mais "atraente" (a primeira não-correta não eliminada)
+    const trapIdx = q.options.findIndex((o, i) => !o.correct && !eliminated.includes(i));
+    if (trapIdx < 0) {
+      toast.info("Nada para revelar aqui.");
+      return;
+    }
+    if (game.cash < 300) {
+      toast.error("Sem saldo (R$ 300) para revelar a pegadinha.");
+      return;
+    }
+    if (game.quizUseRevealTrap()) {
+      setTrapRevealed(trapIdx);
+      toast.success("🕵️ Pegadinha revelada!", { description: "Cuidado com essa alternativa." });
+    } else {
+      toast.error("Sem usos restantes deste power-up.");
+    }
+  };
+
+  const handleSkipChapter = () => {
+    if (game.currentChapter >= 4) {
+      toast.error("Você já está no último capítulo.");
+      return;
+    }
+    if (game.cash < 1500) {
+      toast.error("Sem saldo (R$ 1.500) para trocar de capítulo.");
+      return;
+    }
+    if (!confirm(`Trocar de capítulo custa R$ 1.500 e marca as perguntas restantes como puladas (sem XP). Confirmar?`)) return;
+    if (game.quizUseSkipChapter()) {
+      toast.success("⏭️ Capítulo pulado!");
+    } else {
+      toast.error("Não foi possível pular este capítulo.");
     }
   };
 
@@ -272,13 +312,13 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
 
         {/* Power-ups */}
         {!showResult && (
-          <div className="flex gap-2 mb-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 mb-3">
             <Button
               variant="outline"
               size="sm"
               onClick={handleHint}
               disabled={hintShown || game.hintsLeft <= 0}
-              className="text-xs flex-1"
+              className="text-[11px] sm:text-xs h-9"
             >
               <Lightbulb className="w-3.5 h-3.5 mr-1 text-warning" /> Dica ({game.hintsLeft})
             </Button>
@@ -287,11 +327,31 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
               size="sm"
               onClick={handleFifty}
               disabled={eliminated.length > 0 || game.fiftyLeft <= 0 || q.options.length <= 2}
-              className="text-xs flex-1"
+              className="text-[11px] sm:text-xs h-9"
             >
               <Scissors className="w-3.5 h-3.5 mr-1 text-primary" /> 50/50 ({game.fiftyLeft})
             </Button>
-            <Button variant="outline" size="sm" onClick={onOpenAcademy} className="text-xs flex-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRevealTrap}
+              disabled={trapRevealed != null || game.revealTrapLeft <= 0 || game.cash < 300}
+              className="text-[11px] sm:text-xs h-9"
+              title="Custa R$ 300 — destaca a alternativa-pegadinha"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 mr-1 text-destructive" /> Pegadinha ({game.revealTrapLeft})
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSkipChapter}
+              disabled={game.skipChapterLeft <= 0 || game.cash < 1500 || game.currentChapter >= 4}
+              className="text-[11px] sm:text-xs h-9"
+              title="Custa R$ 1.500 — pula para o próximo capítulo"
+            >
+              <FastForward className="w-3.5 h-3.5 mr-1 text-primary" /> Pular Cap ({game.skipChapterLeft})
+            </Button>
+            <Button variant="outline" size="sm" onClick={onOpenAcademy} className="text-[11px] sm:text-xs h-9 col-span-2 sm:col-span-1">
               <BookOpen className="w-3.5 h-3.5 mr-1" /> Estudar
             </Button>
           </div>
@@ -310,6 +370,7 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
           {q.options.map((opt, i) => {
             const isEliminated = eliminated.includes(i);
             const isPicked = picked === i;
+            const isTrap = trapRevealed === i;
             const reveal = showResult;
             return (
               <button
@@ -317,13 +378,15 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
                 disabled={showResult || isEliminated}
                 onClick={() => handlePick(i)}
                 style={{ animationDelay: `${i * 60}ms` }}
-                className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-smooth flex items-center gap-3 animate-slide-in-right ${
+                className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-smooth flex items-center gap-3 animate-slide-in-right relative ${
                   isEliminated
                     ? "opacity-30 line-through cursor-not-allowed"
                     : reveal && opt.correct
                     ? "border-success bg-success/10 animate-pop-in"
                     : reveal && isPicked && !opt.correct
                     ? "border-destructive bg-destructive/10"
+                    : isTrap && !reveal
+                    ? "border-destructive/60 bg-destructive/5 animate-wiggle"
                     : isPicked
                     ? "border-primary bg-accent"
                     : "border-border hover:border-primary/60 hover:bg-accent/40 hover:-translate-y-0.5 hover:shadow-soft"
@@ -341,6 +404,11 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
                   {String.fromCharCode(65 + i)}
                 </span>
                 <span className="text-sm font-medium flex-1">{opt.label}</span>
+                {isTrap && !reveal && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-destructive/20 text-destructive font-bold flex items-center gap-0.5">
+                    <AlertTriangle className="w-3 h-3" /> Pegadinha
+                  </span>
+                )}
                 {reveal && opt.correct && <Check className="w-5 h-5 text-success shrink-0" />}
                 {reveal && isPicked && !opt.correct && <X className="w-5 h-5 text-destructive shrink-0" />}
               </button>
@@ -379,6 +447,15 @@ export const QuizJourney = ({ onOpenAcademy }: Props) => {
               Próxima pergunta <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </Card>
+        )}
+
+        {showResult && (
+          <MentorFollowup
+            key={q.id}
+            question={q}
+            pickedIdx={picked ?? -1}
+            isCorrect={isCorrect}
+          />
         )}
       </Card>
     </div>

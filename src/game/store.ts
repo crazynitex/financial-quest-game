@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Character, Decision, GameState } from "./engine";
+import { QUIZ_BANK } from "./quizBank";
 import { supabase } from "@/integrations/supabase/client";
 
 interface GameStore extends GameState, QuizState {
@@ -31,6 +32,8 @@ interface GameStore extends GameState, QuizState {
   quizWrongAnswer: (id: string) => void;
   quizUseHint: () => boolean;
   quizUseFiftyFifty: () => boolean;
+  quizUseRevealTrap: () => boolean;
+  quizUseSkipChapter: () => boolean;
   quizRefillLives: () => void;
   quizAdvanceChapter: () => void;
   quizResetRun: () => void;
@@ -49,6 +52,8 @@ interface QuizState {
   currentChapter: number; // 1..4
   hintsLeft: number;
   fiftyLeft: number;
+  revealTrapLeft: number;
+  skipChapterLeft: number;
   totalAnswered: number;
   totalCorrect: number;
 }
@@ -63,6 +68,8 @@ const initialQuiz: QuizState = {
   currentChapter: 1,
   hintsLeft: 3,
   fiftyLeft: 2,
+  revealTrapLeft: 2,
+  skipChapterLeft: 1,
   totalAnswered: 0,
   totalCorrect: 0,
 };
@@ -280,6 +287,32 @@ export const useGame = create<GameStore>()(
         const s = get();
         if (s.fiftyLeft <= 0) return false;
         set({ fiftyLeft: s.fiftyLeft - 1 });
+        return true;
+      },
+      quizUseRevealTrap: () => {
+        const s = get();
+        const COST = 300;
+        if (s.revealTrapLeft <= 0) return false;
+        if (s.cash < COST) return false;
+        set({ revealTrapLeft: s.revealTrapLeft - 1, cash: s.cash - COST });
+        return true;
+      },
+      quizUseSkipChapter: () => {
+        const s = get();
+        const COST = 1500;
+        if (s.skipChapterLeft <= 0) return false;
+        if (s.cash < COST) return false;
+        if (s.currentChapter >= 4) return false;
+        // marca todas as perguntas restantes do capítulo como respondidas (sem ganho)
+        const remaining = QUIZ_BANK
+          .filter((q) => q.chapter === s.currentChapter && !s.answeredIds.includes(q.id))
+          .map((q) => q.id);
+        set({
+          skipChapterLeft: s.skipChapterLeft - 1,
+          cash: s.cash - COST,
+          answeredIds: [...s.answeredIds, ...remaining],
+          combo: 0,
+        });
         return true;
       },
       quizRefillLives: () =>
