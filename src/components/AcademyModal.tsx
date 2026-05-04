@@ -111,6 +111,7 @@ export const AcademyModal = ({ open, onOpenChange }: { open: boolean; onOpenChan
                 );
               })}
             </div>
+            </div>
           </div>
         )}
 
