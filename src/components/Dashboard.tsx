@@ -10,7 +10,7 @@ import { CTABanner } from "./CTABanner";
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
-export const Dashboard = () => {
+export const Dashboard = ({ embedded = false }: { embedded?: boolean } = {}) => {
   const game = useGame();
   const goal = GOAL_INFO[game.character.goal];
 
@@ -26,20 +26,22 @@ export const Dashboard = () => {
   const ratingColor = game.finScore >= 75 ? "text-success" : game.finScore >= 50 ? "text-primary" : "text-warning";
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <header className="container py-3 flex items-center justify-between border-b bg-background/60 backdrop-blur sticky top-0 z-10">
-        <Logo />
-        <UserMenu />
-      </header>
+    <div className={embedded ? "" : "min-h-screen bg-gradient-hero"}>
+      {!embedded && (
+        <header className="container py-3 flex items-center justify-between border-b bg-background/60 backdrop-blur sticky top-0 z-10">
+          <Logo />
+          <UserMenu />
+        </header>
+      )}
 
-      <main className="container py-8 max-w-5xl">
+      <main className={embedded ? "max-w-5xl mx-auto" : "container py-8 max-w-5xl"}>
         {/* Hero */}
         <div className="text-center mb-10 animate-slide-up">
           <div className="inline-flex w-20 h-20 rounded-full bg-gradient-primary items-center justify-center mb-4 shadow-glow animate-pulse-glow">
             <Trophy className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="font-display text-4xl font-bold mb-2">
-            Jornada de {game.character.name} concluída
+            {embedded ? `Painel de ${game.character.name}` : `Jornada de ${game.character.name} concluída`}
           </h1>
           <p className="text-lg text-muted-foreground">
             Inteligência financeira: <span className={`font-bold ${ratingColor}`}>{rating}</span>
@@ -144,16 +146,20 @@ export const Dashboard = () => {
 
         <CTABanner />
 
-        <div className="text-center mt-8">
-          <Button size="lg" onClick={() => game.resetGame()} className="bg-gradient-primary h-14 px-8 shadow-elegant">
-            Jogar novamente
-          </Button>
-        </div>
+        {!embedded && (
+          <div className="text-center mt-8">
+            <Button size="lg" onClick={() => game.resetGame()} className="bg-gradient-primary h-14 px-8 shadow-elegant">
+              Jogar novamente
+            </Button>
+          </div>
+        )}
 
-        <footer className="text-center text-xs text-muted-foreground mt-12 pt-8 border-t">
-          Desenvolvido pela <span className="font-semibold text-foreground">Equipe Code</span> •
-          Powered by <span className="font-semibold text-primary">Ademicon</span>
-        </footer>
+        {!embedded && (
+          <footer className="text-center text-xs text-muted-foreground mt-12 pt-8 border-t">
+            Desenvolvido pela <span className="font-semibold text-foreground">Equipe Code</span> •
+            Powered by <span className="font-semibold text-primary">Ademicon</span>
+          </footer>
+        )}
       </main>
     </div>
   );

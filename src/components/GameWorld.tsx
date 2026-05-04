@@ -16,6 +16,7 @@ import { FinTipCard } from "./FinTipCard";
 import { AchievementWatcher } from "./AchievementToast";
 import { restartTutorial } from "./Tutorial";
 import { QuizJourney } from "./QuizJourney";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -23,6 +24,7 @@ const formatBRL = (v: number) =>
 export const GameWorld = () => {
   const game = useGame();
   const [academyOpen, setAcademyOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
   const [tipTrigger, setTipTrigger] = useState(0);
   const [prevAnswered, setPrevAnswered] = useState(game.totalAnswered);
 
@@ -44,10 +46,29 @@ export const GameWorld = () => {
   const accuracy = game.totalAnswered > 0 ? Math.round((game.totalCorrect / game.totalAnswered) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-hero relative">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Aurora background premium */}
+      <div className="pointer-events-none absolute inset-0 -z-0 opacity-60">
+        <div className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full bg-primary/20 blur-3xl animate-float" />
+        <div className="absolute top-1/3 -right-40 w-[520px] h-[520px] rounded-full bg-primary-glow/20 blur-3xl animate-float" style={{ animationDelay: "1.2s" }} />
+        <div className="absolute bottom-0 left-1/3 w-[420px] h-[420px] rounded-full bg-accent/40 blur-3xl animate-float" style={{ animationDelay: "0.6s" }} />
+      </div>
+
       <AchievementWatcher />
       <Tutorial />
       <AcademyModal open={academyOpen} onOpenChange={setAcademyOpen} />
+
+      {/* Dashboard como painel — não encerra o jogo */}
+      <Sheet open={dashboardOpen} onOpenChange={setDashboardOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto p-0">
+          <SheetHeader className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b px-6 py-4">
+            <SheetTitle className="font-display text-xl">Painel & Ranking</SheetTitle>
+          </SheetHeader>
+          <div className="p-6">
+            <Dashboard embedded />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <header className="container py-3 flex items-center justify-between gap-2 border-b bg-background/70 backdrop-blur sticky top-0 z-20">
         <Logo />
@@ -58,14 +79,20 @@ export const GameWorld = () => {
           <Button variant="ghost" size="sm" onClick={() => setAcademyOpen(true)} className="px-2 sm:px-3">
             <Sparkles className="w-4 h-4 sm:mr-1.5 text-primary" /> <span className="hidden sm:inline">Academy</span>
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => game.finish()} className="px-2 sm:px-3">
-            <Award className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Dashboard</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDashboardOpen(true)}
+            className="px-2 sm:px-3 hover:shadow-glow transition-smooth"
+            title="Ver painel e ranking"
+          >
+            <Award className="w-4 h-4 sm:mr-1.5 text-primary" /> <span className="hidden sm:inline">Painel</span>
           </Button>
           <UserMenu />
         </div>
       </header>
 
-      <main className="container py-4 sm:py-6 grid lg:grid-cols-3 gap-4 sm:gap-6">
+      <main className="container py-4 sm:py-6 grid lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
         {/* Left: Game */}
         <div className="lg:col-span-2 space-y-3 sm:space-y-4 min-w-0">
           {/* Player stats */}
