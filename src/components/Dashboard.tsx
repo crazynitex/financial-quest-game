@@ -26,20 +26,22 @@ export const Dashboard = ({ embedded = false }: { embedded?: boolean } = {}) => 
   const ratingColor = game.finScore >= 75 ? "text-success" : game.finScore >= 50 ? "text-primary" : "text-warning";
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <header className="container py-3 flex items-center justify-between border-b bg-background/60 backdrop-blur sticky top-0 z-10">
-        <Logo />
-        <UserMenu />
-      </header>
+    <div className={embedded ? "" : "min-h-screen bg-gradient-hero"}>
+      {!embedded && (
+        <header className="container py-3 flex items-center justify-between border-b bg-background/60 backdrop-blur sticky top-0 z-10">
+          <Logo />
+          <UserMenu />
+        </header>
+      )}
 
-      <main className="container py-8 max-w-5xl">
+      <main className={embedded ? "max-w-5xl mx-auto" : "container py-8 max-w-5xl"}>
         {/* Hero */}
         <div className="text-center mb-10 animate-slide-up">
           <div className="inline-flex w-20 h-20 rounded-full bg-gradient-primary items-center justify-center mb-4 shadow-glow animate-pulse-glow">
             <Trophy className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="font-display text-4xl font-bold mb-2">
-            Jornada de {game.character.name} concluída
+            {embedded ? `Painel de ${game.character.name}` : `Jornada de ${game.character.name} concluída`}
           </h1>
           <p className="text-lg text-muted-foreground">
             Inteligência financeira: <span className={`font-bold ${ratingColor}`}>{rating}</span>
