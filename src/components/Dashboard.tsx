@@ -146,16 +146,20 @@ export const Dashboard = ({ embedded = false }: { embedded?: boolean } = {}) => 
 
         <CTABanner />
 
-        <div className="text-center mt-8">
-          <Button size="lg" onClick={() => game.resetGame()} className="bg-gradient-primary h-14 px-8 shadow-elegant">
-            Jogar novamente
-          </Button>
-        </div>
+        {!embedded && (
+          <div className="text-center mt-8">
+            <Button size="lg" onClick={() => game.resetGame()} className="bg-gradient-primary h-14 px-8 shadow-elegant">
+              Jogar novamente
+            </Button>
+          </div>
+        )}
 
-        <footer className="text-center text-xs text-muted-foreground mt-12 pt-8 border-t">
-          Desenvolvido pela <span className="font-semibold text-foreground">Equipe Code</span> •
-          Powered by <span className="font-semibold text-primary">Ademicon</span>
-        </footer>
+        {!embedded && (
+          <footer className="text-center text-xs text-muted-foreground mt-12 pt-8 border-t">
+            Desenvolvido pela <span className="font-semibold text-foreground">Equipe Code</span> •
+            Powered by <span className="font-semibold text-primary">Ademicon</span>
+          </footer>
+        )}
       </main>
     </div>
   );
