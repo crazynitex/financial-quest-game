@@ -16,6 +16,7 @@ import { FinTipCard } from "./FinTipCard";
 import { AchievementWatcher } from "./AchievementToast";
 import { restartTutorial } from "./Tutorial";
 import { QuizJourney } from "./QuizJourney";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
