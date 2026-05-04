@@ -10,7 +10,7 @@ import { CTABanner } from "./CTABanner";
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
-export const Dashboard = () => {
+export const Dashboard = ({ embedded = false }: { embedded?: boolean } = {}) => {
   const game = useGame();
   const goal = GOAL_INFO[game.character.goal];
 
