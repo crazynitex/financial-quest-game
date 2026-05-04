@@ -24,31 +24,45 @@ export const MentorFollowup = ({ question, pickedIdx, isCorrect }: Props) => {
   const [followLoading, setFollowLoading] = useState(false);
   const startedRef = useRef(false);
 
-  const stream = async (userPrompt: string, onChunk: (s: string) => void) => {
+  const stream = async (userPrompt: string, onChunk: (s: string) => void): Promise<{ ok: boolean; status: number }> => {
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mentor-chat`;
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      },
-      body: JSON.stringify({
-        messages: [{ role: "user", content: userPrompt }],
-        playerContext: {
-          nome: game.character.name,
-          idade: game.character.age,
-          renda: game.character.income,
-          objetivo: GOAL_INFO[game.character.goal].label,
-          progresso_objetivo: `${Math.round(game.goalProgress)}%`,
-          combo_atual: game.combo,
-          vidas: game.lives,
-          score_financeiro: game.finScore,
+    let resp: Response;
+    try {
+      resp = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-      }),
-    });
+        body: JSON.stringify({
+          messages: [{ role: "user", content: userPrompt }],
+          playerContext: {
+            nome: game.character.name,
+            idade: game.character.age,
+            renda: game.character.income,
+            objetivo: GOAL_INFO[game.character.goal].label,
+            progresso_objetivo: `${Math.round(game.goalProgress)}%`,
+            combo_atual: game.combo,
+            vidas: game.lives,
+            score_financeiro: game.finScore,
+          },
+        }),
+      });
+    } catch {
+      onChunk("⚠️ Sem conexão com o Mentor IA. Tente novamente em instantes.");
+      return { ok: false, status: 0 };
+    }
+    if (resp.status === 429) {
+      onChunk("⏳ O Mentor IA está com muitas perguntas agora. Aguarde alguns segundos e responda a próxima pergunta para tentar de novo.");
+      return { ok: false, status: 429 };
+    }
+    if (resp.status === 402) {
+      onChunk("💳 Créditos do Mentor IA esgotados. Volte em breve.");
+      return { ok: false, status: 402 };
+    }
     if (!resp.ok || !resp.body) {
       onChunk("Não consegui responder agora. Tente novamente.");
-      return;
+      return { ok: false, status: resp.status };
     }
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
@@ -79,6 +93,7 @@ export const MentorFollowup = ({ question, pickedIdx, isCorrect }: Props) => {
         }
       }
     }
+    return { ok: true, status: 200 };
   };
 
   useEffect(() => {
