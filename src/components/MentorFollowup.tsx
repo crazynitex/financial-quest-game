@@ -113,14 +113,18 @@ export const MentorFollowup = ({ question, pickedIdx, isCorrect }: Props) => {
     stream(prompt, (c) => {
       acc += c;
       setText(acc);
-    }).finally(async () => {
+    }).then(async (res) => {
       setLoading(false);
       setDone(true);
-      // gerar 3 follow-ups
+      // Se rate-limited ou erro, NÃO dispara segunda chamada (evita 429 em cascata)
+      if (!res.ok) return;
+      // Pequena folga para não saturar o gateway
+      await new Promise((r) => setTimeout(r, 800));
       try {
         const fuPrompt = `Com base no tema da pergunta "${question.question}", gere EXATAMENTE 3 perguntas curtas (máx 8 palavras cada) que o usuário pode querer fazer em seguida sobre consórcio/finanças. Responda APENAS as 3 perguntas, uma por linha, sem numeração.`;
         let fuAcc = "";
-        await stream(fuPrompt, (c) => { fuAcc += c; });
+        const fuRes = await stream(fuPrompt, (c) => { fuAcc += c; });
+        if (!fuRes.ok) return;
         const lines = fuAcc.split("\n").map((l) => l.replace(/^[-*\d.\s]+/, "").trim()).filter(Boolean).slice(0, 3);
         setFollowups(lines);
       } catch { /* noop */ }
