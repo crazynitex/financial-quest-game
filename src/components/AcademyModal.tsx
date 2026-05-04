@@ -59,10 +59,29 @@ export const AcademyModal = ({ open, onOpenChange }: { open: boolean; onOpenChan
         </DialogHeader>
 
         {!lesson && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
               Aprenda como o consórcio funciona em mini-lições. Cada uma dá XP e melhora seu Score Financeiro.
             </p>
+
+            {/* Vídeo-aula 60s */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Film className="w-4 h-4 text-primary" />
+                <h3 className="text-xs uppercase tracking-wider font-bold">Vídeo-aula · 60 segundos</h3>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold uppercase ml-auto">
+                  Decisão boa vs ruim
+                </span>
+              </div>
+              <AcademyVideo
+                onFinished={() =>
+                  toast.success("🎬 Vídeo-aula concluída! Agora explore as lições abaixo.")
+                }
+              />
+            </div>
+
+            <div>
+              <h3 className="text-xs uppercase tracking-wider font-bold mb-2">Mini-lições interativas</h3>
             <div className="grid sm:grid-cols-2 gap-3">
               {LESSONS.map((l) => {
                 const done = lessonsCompleted.includes(l.id);
