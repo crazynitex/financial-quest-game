@@ -23,6 +23,7 @@ const formatBRL = (v: number) =>
 export const GameWorld = () => {
   const game = useGame();
   const [academyOpen, setAcademyOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
   const [tipTrigger, setTipTrigger] = useState(0);
   const [prevAnswered, setPrevAnswered] = useState(game.totalAnswered);
 
