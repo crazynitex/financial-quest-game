@@ -4,8 +4,9 @@ import { useGame } from "@/game/store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, GraduationCap, ArrowRight, Award } from "lucide-react";
+import { CheckCircle2, GraduationCap, ArrowRight, Award, Film } from "lucide-react";
 import { toast } from "sonner";
+import { AcademyVideo } from "./AcademyVideo";
 
 export const AcademyModal = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) => {
   const { lessonsCompleted, completeLesson } = useGame();
