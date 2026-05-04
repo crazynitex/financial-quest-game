@@ -92,7 +92,7 @@ export const GameWorld = () => {
         </div>
       </header>
 
-      <main className="container py-4 sm:py-6 grid lg:grid-cols-3 gap-4 sm:gap-6">
+      <main className="container py-4 sm:py-6 grid lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
         {/* Left: Game */}
         <div className="lg:col-span-2 space-y-3 sm:space-y-4 min-w-0">
           {/* Player stats */}
