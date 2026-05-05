@@ -1,4 +1,4 @@
-export type GoalType = "house" | "car" | "motorcycle" | "travel";
+export type GoalType = "exchange" | "education" | "motorcycle" | "popularCar" | "professionalSetup" | "firstHome";
 
 export interface Character {
   name: string;
