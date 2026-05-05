@@ -8,20 +8,9 @@ import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { Logo } from "./Logo";
 import { UserMenu } from "./UserMenu";
-import iconHouse from "@/assets/icon-house.png";
-import iconCar from "@/assets/icon-car.png";
-import iconTravel from "@/assets/icon-travel.png";
-import iconMoto from "@/assets/icon-moto.png";
 import heroImg from "@/assets/hero-character.jpg";
 import { ArrowRight, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-const goalIcons: Record<GoalType, string> = {
-  house: iconHouse,
-  car: iconCar,
-  motorcycle: iconMoto,
-  travel: iconTravel,
-};
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -31,7 +20,7 @@ export const CharacterCreation = () => {
   const [name, setName] = useState("");
   const [age, setAge] = useState([28]);
   const [income, setIncome] = useState([4000]);
-  const [goal, setGoal] = useState<GoalType>("house");
+  const [goal, setGoal] = useState<GoalType>("firstHome");
 
   const canStart = name.trim().length >= 2;
   const expectedExpenses = Math.round(income[0] * 0.65);
@@ -162,20 +151,21 @@ export const CharacterCreation = () => {
 
               <div className="space-y-3">
                 <Label>Seu objetivo principal</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                   {(Object.keys(GOAL_INFO) as GoalType[]).map((g) => (
                     <button
                       key={g}
                       onClick={() => setGoal(g)}
-                      className={`p-3 sm:p-4 rounded-2xl border-2 transition-bounce flex flex-col items-center gap-1.5 sm:gap-2 ${
+                      className={`p-3 sm:p-4 rounded-2xl border-2 transition-bounce flex flex-col items-center gap-1.5 text-center ${
                         goal === g
                           ? "border-primary bg-accent shadow-soft scale-105 animate-pop-in"
                           : "border-border hover:border-primary/40 hover:-translate-y-0.5"
                       }`}
                     >
-                      <img src={goalIcons[g]} alt={GOAL_INFO[g].label} className="w-9 h-9 sm:w-12 sm:h-12 object-contain" loading="lazy" />
-                      <span className="text-[11px] sm:text-xs font-semibold text-center leading-tight">{GOAL_INFO[g].label}</span>
-                      <span className="text-[10px] text-muted-foreground tabular-nums">{formatBRL(GOAL_INFO[g].value)}</span>
+                      <span className="text-3xl sm:text-4xl leading-none">{GOAL_INFO[g].emoji}</span>
+                      <span className="text-[12px] sm:text-sm font-bold leading-tight">{GOAL_INFO[g].label}</span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground leading-snug line-clamp-2">{GOAL_INFO[g].tagline}</span>
+                      <span className="text-[10px] text-primary font-semibold tabular-nums">{formatBRL(GOAL_INFO[g].value)}</span>
                     </button>
                   ))}
                 </div>

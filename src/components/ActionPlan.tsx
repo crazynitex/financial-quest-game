@@ -1,5 +1,6 @@
 import { useGame } from "@/game/store";
-import { GOAL_INFO, simulateConsortium, simulateFinancing } from "@/game/engine";
+import { GOAL_INFO, simulateConsortium, simulateFinancing, type GameState } from "@/game/engine";
+import { ARCHETYPES, assignArchetype, type ArchetypeId } from "@/game/archetypes";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Target, Sparkles, ExternalLink, CheckCircle2, Share2, Flame, Zap, Calendar, ArrowRight, QrCode } from "lucide-react";
@@ -8,7 +9,24 @@ import ademiImg from "@/assets/ademi-avatar.jpg";
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
-const ADEMICON_URL = "https://www.ademicon.com.br/";
+const GAME_URL = "https://preview--financial-quest-game.lovable.app/";
+
+function buildAdemiconUrl(game: GameState, archetypeId: ArchetypeId): string {
+  const goalInfo = GOAL_INFO[game.character.goal];
+  const archetype = ARCHETYPES[archetypeId];
+  const params = new URLSearchParams({
+    utm_source: "ademiconecta",
+    utm_medium: "game",
+    utm_campaign: "hackathon_2026",
+    utm_content: archetypeId,
+    nome: game.character.name || "",
+    objetivo: goalInfo.label,
+    valor: String(goalInfo.value),
+    renda: String(game.character.income || 0),
+    arquetipo: archetype.name,
+  });
+  return `https://www.ademicon.com.br/?${params.toString()}`;
+}
 
 /**
  * Plano de Ação — substitui o antigo Dashboard.
@@ -17,12 +35,14 @@ const ADEMICON_URL = "https://www.ademicon.com.br/";
  */
 export const ActionPlan = () => {
   const game = useGame();
+  const archetypeId = assignArchetype(game);
+  const archetype = ARCHETYPES[archetypeId];
+  const ademiconUrl = buildAdemiconUrl(game, archetypeId);
   const goal = GOAL_INFO[game.character.goal];
   const fin = simulateFinancing(goal.value);
   const cons = simulateConsortium(goal.value);
   const economy = fin.totalCost - cons.totalCost;
   const accuracy = game.totalAnswered > 0 ? Math.round((game.totalCorrect / game.totalAnswered) * 100) : 0;
-  const rating = game.finScore >= 75 ? "EXPERT" : game.finScore >= 50 ? "EM ASCENSÃO" : "INICIANTE";
 
   // Plano de ação em 4 passos personalizados
   const steps = [
@@ -52,18 +72,32 @@ export const ActionPlan = () => {
     },
   ];
 
-  // QR Code para a Ademicon (gerado por API pública, sem deps)
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
-    ADEMICON_URL
+  // QR do arquétipo → leva pro JOGO (loop viral)
+  const shareParams = new URLSearchParams({
+    utm_source: "share",
+    utm_medium: "archetype",
+    utm_campaign: "viral_loop",
+    utm_content: archetypeId,
+    convidadoPor: game.character.name || "",
+    arquetipoAmigo: archetype.name,
+  });
+  const gameShareUrl = `${GAME_URL}?${shareParams.toString()}`;
+  const archetypeQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
+    gameShareUrl
   )}&bgcolor=0f172a&color=ffffff&qzone=2`;
 
-  const shareCard = async () => {
-    const text = `🔥 Sou ${rating} em educação financeira na Ademi Conecta! Score ${game.finScore}/100 · Nível ${game.level} · ${accuracy}% de acertos. Bora?`;
+  // QR do final → leva pra ADEMICON (conversão real)
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
+    ademiconUrl
+  )}&bgcolor=0f172a&color=ffffff&qzone=2`;
+
+  const shareArchetype = async () => {
+    const text = `Joguei o Ademi Conecta e descobri que sou "${archetype.name}" ${archetype.emoji}\n\n"${archetype.tagline}"\n\nQual arquétipo você é? Joga aí 👇`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Meu perfil Ademi Conecta", text, url: ADEMICON_URL });
+        await navigator.share({ title: "Meu arquétipo no Ademi Conecta", text, url: gameShareUrl });
       } else {
-        await navigator.clipboard.writeText(`${text} ${ADEMICON_URL}`);
+        await navigator.clipboard.writeText(`${text}\n${gameShareUrl}`);
       }
     } catch {
       /* noop */
@@ -83,39 +117,63 @@ export const ActionPlan = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5" />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-90">
-                Ademi Conecta · Perfil
+                Resultado Ademi Conecta
               </span>
             </div>
             <button
-              onClick={shareCard}
+              onClick={shareArchetype}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-[11px] font-semibold transition"
-              title="Compartilhar"
+              title="Compartilhar meu arquétipo"
             >
-              <Share2 className="w-3 h-3" /> Compartilhar
+              <Share2 className="w-3 h-3" /> Compartilhar meu arquétipo
             </button>
           </div>
 
-          <div className="flex items-center gap-4 mb-5">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center text-3xl sm:text-4xl shadow-xl ring-2 ring-white/30">
-              {goal.emoji}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider opacity-80">{rating}</p>
-              <h2 className="font-display font-black text-2xl sm:text-3xl leading-tight truncate">
-                {game.character.name || "Você"}
-              </h2>
-              <p className="text-xs sm:text-sm opacity-90 truncate">
-                Sonha com {goal.label.toLowerCase()} · {formatBRL(goal.value)}
-              </p>
-            </div>
+          <div className="text-center mb-5">
+            <div className="text-7xl sm:text-8xl leading-none mb-2">{archetype.emoji}</div>
+            <h2 className="font-display font-black text-3xl sm:text-4xl leading-tight">
+              {archetype.name}
+            </h2>
+            <p className="italic opacity-90 text-sm sm:text-base mt-2 max-w-md mx-auto">
+              "{archetype.tagline}"
+            </p>
           </div>
 
-          {/* "Top tracks" — métricas do jogador */}
-          <div className="grid grid-cols-4 gap-2 mb-5">
-            <Stat label="Score" value={`${game.finScore}`} />
-            <Stat label="Nível" value={`${game.level}`} />
-            <Stat label="Acertos" value={`${accuracy}%`} />
-            <Stat label="Combo" value={`×${game.bestCombo}`} />
+          <div className="mb-5 p-3 rounded-xl bg-black/25 backdrop-blur border-l-4 border-[#FFD700]">
+            <p className="text-xs sm:text-sm leading-snug">
+              <span className="font-bold uppercase tracking-wider text-[10px] block mb-1 opacity-80">Insight</span>
+              {archetype.insight}
+            </p>
+          </div>
+
+          {/* Stats BuzzFeed-style */}
+          <div className="grid grid-cols-4 gap-2 mb-3">
+            <BlackStat label="Score" value={`${game.finScore}`} />
+            <BlackStat label="Nível" value={`${game.level}`} />
+            <BlackStat label="Combo Máx" value={`×${game.bestCombo}`} />
+            <BlackStat label="Acertos" value={`${accuracy}%`} />
+          </div>
+
+          <p className="text-center text-xs sm:text-sm font-semibold opacity-90 mb-5">
+            {game.character.name || "Jogador"}
+          </p>
+
+          {/* QR do arquétipo → leva pro JOGO (loop viral) */}
+          <div className="flex items-center gap-4 p-3 rounded-2xl bg-black/25 backdrop-blur border border-white/10 mb-3">
+            <div className="shrink-0 p-1.5 rounded-xl bg-white">
+              <img src={archetypeQrUrl} alt="QR Code do jogo" className="w-20 h-20 sm:w-24 sm:h-24" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider opacity-90 mb-0.5">
+                <QrCode className="w-3 h-3" /> Desafia teus amigos
+              </div>
+              <p className="font-display font-bold text-base sm:text-lg leading-tight">
+                Qual arquétipo eles são?
+              </p>
+              <p className="text-[11px] opacity-85 mt-0.5">
+                Escaneie e jogue o Ademi Conecta.
+              </p>
+            </div>
           </div>
 
           {/* QR + CTA — ponte simulação → vida real */}
@@ -189,7 +247,7 @@ export const ActionPlan = () => {
         </div>
         <div className="relative max-w-[70%]">
           <div className="flex items-center gap-2 mb-2">
-            <img src={ademiImg} alt="Ademi" className="w-10 h-10 rounded-full object-cover bg-accent ring-2 ring-primary" />
+            <img src={ademiImg} alt="Ademi" className="w-10 h-10 rounded-full object-cover object-top bg-accent ring-2 ring-primary" />
             <div>
               <p className="font-display font-bold text-sm">Ademi</p>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Sua mentora IA</p>
@@ -199,7 +257,7 @@ export const ActionPlan = () => {
             "Você já provou que entende. Agora dá o passo que importa de verdade — fora do jogo."
           </p>
           <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
-            <a href={ADEMICON_URL} target="_blank" rel="noopener noreferrer">
+            <a href={ademiconUrl} target="_blank" rel="noopener noreferrer">
               Sair da simulação <ArrowRight className="w-4 h-4 ml-1" />
             </a>
           </Button>
@@ -223,7 +281,7 @@ export const ActionPlan = () => {
 
       {/* ===== CTA final reforçado ===== */}
       <a
-        href={ADEMICON_URL}
+        href={ademiconUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="block p-5 rounded-2xl bg-gradient-primary text-primary-foreground shadow-elegant hover:scale-[1.01] transition-transform"
@@ -245,6 +303,13 @@ const Stat = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-xl bg-white/15 backdrop-blur p-2 text-center">
     <div className="font-display font-black text-base sm:text-lg tabular-nums">{value}</div>
     <div className="text-[9px] uppercase tracking-wider opacity-80 font-semibold">{label}</div>
+  </div>
+);
+
+const BlackStat = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-xl bg-black/40 backdrop-blur p-2 text-center border border-white/10">
+    <div className="font-display font-black text-2xl tabular-nums">{value}</div>
+    <div className="text-[9px] uppercase tracking-wider opacity-80 font-semibold mt-0.5">{label}</div>
   </div>
 );
 

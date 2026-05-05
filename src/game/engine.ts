@@ -1,4 +1,4 @@
-export type GoalType = "house" | "car" | "motorcycle" | "travel";
+export type GoalType = "exchange" | "education" | "motorcycle" | "popularCar" | "professionalSetup" | "firstHome";
 
 export interface Character {
   name: string;
@@ -146,11 +146,13 @@ export interface EventOption {
   type: "good" | "bad" | "neutral";
 }
 
-export const GOAL_INFO: Record<GoalType, { label: string; value: number; emoji: string }> = {
-  house: { label: "Casa Própria", value: 250000, emoji: "🏠" },
-  car: { label: "Carro Novo", value: 80000, emoji: "🚗" },
-  motorcycle: { label: "Moto Nova", value: 22000, emoji: "🏍️" },
-  travel: { label: "Viagem dos Sonhos", value: 25000, emoji: "✈️" },
+export const GOAL_INFO: Record<GoalType, { label: string; value: number; emoji: string; tagline: string }> = {
+  exchange:           { label: "Passaporte Carimbado", value: 35000, emoji: "✈️", tagline: "Tu na Irlanda em 18 meses, sem voltar pro Brasil endividado." },
+  education:          { label: "Diploma na Parede",   value: 30000, emoji: "🎓", tagline: "Faculdade, técnico ou pós paga sem dever pro FIES por 10 anos." },
+  motorcycle:         { label: "Chave na Mão",        value: 22000, emoji: "🏍️", tagline: "Tua primeira moto, sem dever pra financeira por 5 anos." },
+  popularCar:         { label: "Quatro Rodas",        value: 65000, emoji: "🚗", tagline: "Carro popular, sem CDC de 24% ao ano." },
+  professionalSetup:  { label: "Setup Completo",      value: 18000, emoji: "📸", tagline: "Câmera, notebook, kit DJ — o equipamento que paga teu freela." },
+  firstHome:          { label: "Saindo de Casa",      value: 25000, emoji: "🛋️", tagline: "Geladeira, fogão, sofá. Pra parar de morar com os pais." },
 };
 
 // ====== MINI-GAMES (quizzes rápidos no fim de cada mês) ======
