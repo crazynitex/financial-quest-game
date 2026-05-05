@@ -33,9 +33,10 @@ const SCENES = [
 export const AcademyVideo = ({ onFinished }: { onFinished?: () => void }) => {
   const [t, setT] = useState(0); // tempo em segundos (float)
   const [playing, setPlaying] = useState(true);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const lastFrame = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const ambientRef = useRef<{ osc: OscillatorNode; gain: GainNode; lfo: OscillatorNode } | null>(null);
   const lastBeepScene = useRef<number>(-1);
 
   // Loop de animação suave (60fps)
@@ -64,25 +65,72 @@ export const AcademyVideo = ({ onFinished }: { onFinished?: () => void }) => {
     return () => cancelAnimationFrame(raf);
   }, [playing, onFinished]);
 
-  // Beep sutil ao trocar de cena (se som ativado)
+  // Trilha ambiente sutil + acentos por cena
   const currentSceneIdx = SCENES.findIndex((s) => t >= s.start && t < s.end);
+
+  // Liga/desliga música ambiente conforme play/mute
+  useEffect(() => {
+    const stopAmbient = () => {
+      if (ambientRef.current) {
+        try {
+          ambientRef.current.osc.stop();
+          ambientRef.current.lfo.stop();
+        } catch {}
+        ambientRef.current = null;
+      }
+    };
+    if (muted || !playing || t >= DURATION) {
+      stopAmbient();
+      return;
+    }
+    try {
+      const ctx = audioCtxRef.current ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioCtxRef.current = ctx;
+      if (ctx.state === "suspended") ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const lfo = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 174; // F3 — tom calmo
+      gain.gain.value = 0.025;
+      lfo.frequency.value = 0.25;
+      lfoGain.gain.value = 0.012;
+      lfo.connect(lfoGain).connect(gain.gain);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      lfo.start();
+      ambientRef.current = { osc, gain, lfo };
+      return stopAmbient;
+    } catch {
+      return;
+    }
+  }, [muted, playing, t >= DURATION]);
+
+  // Acentos curtos a cada troca de cena
   useEffect(() => {
     if (muted) return;
     if (currentSceneIdx === lastBeepScene.current) return;
     lastBeepScene.current = currentSceneIdx;
-    if (currentSceneIdx <= 0) return;
+    if (currentSceneIdx < 0) return;
     try {
       const ctx = audioCtxRef.current ?? new (window.AudioContext || (window as any).webkitAudioContext)();
       audioCtxRef.current = ctx;
+      // Notas diferentes por cena para "narrar" a transição
+      const notes = [523, 587, 392, 659, 698, 784]; // C5,D5,G4,E5,F5,G5
+      const f = notes[currentSceneIdx] ?? 660;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.frequency.value = 660;
-      gain.gain.value = 0.08;
+      osc.type = "triangle";
+      osc.frequency.value = f;
+      gain.gain.value = 0.0001;
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.start();
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
-      osc.stop(ctx.currentTime + 0.2);
+      const now = ctx.currentTime;
+      osc.start(now);
+      gain.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+      osc.stop(now + 0.55);
     } catch {
       /* noop */
     }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Logo } from "./Logo";
 import { MentorChat } from "./MentorChat";
-import { Dashboard } from "./Dashboard";
+import { ActionPlan } from "./ActionPlan";
 import { GameOverScreen } from "./GameOverScreen";
 import { AcademyModal } from "./AcademyModal";
 import { CTABanner } from "./CTABanner";
@@ -39,7 +39,22 @@ export const GameWorld = () => {
   }, [game.totalAnswered, prevAnswered]);
 
   if (game.gameOver) return <GameOverScreen />;
-  if (game.finished) return <Dashboard />;
+  if (game.finished) return (
+    <div className="min-h-screen bg-gradient-hero">
+      <header className="container py-3 flex items-center justify-between border-b bg-background/60 backdrop-blur sticky top-0 z-10">
+        <Logo />
+        <UserMenu />
+      </header>
+      <main className="container py-8 max-w-3xl">
+        <ActionPlan />
+        <div className="text-center mt-8">
+          <Button size="lg" onClick={() => game.resetGame()} className="bg-gradient-primary h-14 px-8 shadow-elegant">
+            Jogar novamente
+          </Button>
+        </div>
+      </main>
+    </div>
+  );
 
   const xpInLevel = game.xp % 100;
   const unlockedAchievements = ACHIEVEMENTS.filter((a) => game.achievements.includes(a.id));
@@ -62,10 +77,10 @@ export const GameWorld = () => {
       <Sheet open={dashboardOpen} onOpenChange={setDashboardOpen}>
         <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto p-0">
           <SheetHeader className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b px-6 py-4">
-            <SheetTitle className="font-display text-xl">Painel & Ranking</SheetTitle>
+            <SheetTitle className="font-display text-xl">Plano de Ação</SheetTitle>
           </SheetHeader>
           <div className="p-6">
-            <Dashboard embedded />
+            <ActionPlan />
           </div>
         </SheetContent>
       </Sheet>
@@ -84,9 +99,9 @@ export const GameWorld = () => {
             size="sm"
             onClick={() => setDashboardOpen(true)}
             className="px-2 sm:px-3 hover:shadow-glow transition-smooth"
-            title="Ver painel e ranking"
+            title="Ver plano de ação"
           >
-            <Award className="w-4 h-4 sm:mr-1.5 text-primary" /> <span className="hidden sm:inline">Painel</span>
+            <Award className="w-4 h-4 sm:mr-1.5 text-primary" /> <span className="hidden sm:inline">Plano</span>
           </Button>
           <UserMenu />
         </div>

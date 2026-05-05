@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 import { Send, Sparkles } from "lucide-react";
-import mentorImg from "@/assets/mentor-ai.png";
+import mentorImg from "@/assets/ademi-avatar.jpg";
 
 interface Msg {
   role: "user" | "assistant";
@@ -25,7 +25,7 @@ export const MentorChat = () => {
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
-      content: `Olá, **${game.character.name}**! 👋 Sou seu Mentor Financeiro IA. Vejo que seu objetivo é **${GOAL_INFO[game.character.goal].label}** ${GOAL_INFO[game.character.goal].emoji}. Pode me perguntar qualquer coisa sobre dinheiro, consórcio ou suas decisões no jogo!`,
+      content: `Oi, **${game.character.name}**! 👋 Sou a **Ademi**, sua mentora financeira IA. Vejo que seu objetivo é **${GOAL_INFO[game.character.goal].label}** ${GOAL_INFO[game.character.goal].emoji}. Me pergunte qualquer coisa sobre dinheiro, consórcio ou suas decisões no jogo!`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -130,14 +130,14 @@ export const MentorChat = () => {
     <div className="flex flex-col h-full bg-gradient-card rounded-3xl border-2 overflow-hidden">
       <div className="flex items-center gap-3 p-4 border-b bg-background/60">
         <div className="relative">
-          <img src={mentorImg} alt="Mentor IA" className="w-12 h-12 rounded-full object-contain bg-accent" />
+          <img src={mentorImg} alt="Ademi — Mentora IA" className="w-12 h-12 rounded-full object-cover bg-accent ring-2 ring-primary" />
           <span className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-background" />
         </div>
         <div>
           <h3 className="font-display font-bold flex items-center gap-1.5">
-            Mentor Financeiro <Sparkles className="w-4 h-4 text-primary" />
+            Ademi <Sparkles className="w-4 h-4 text-primary" />
           </h3>
-          <p className="text-xs text-muted-foreground">IA pronta para ajudar</p>
+          <p className="text-xs text-muted-foreground">Sua mentora financeira IA</p>
         </div>
       </div>
 
