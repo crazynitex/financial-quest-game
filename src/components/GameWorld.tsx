@@ -40,7 +40,22 @@ export const GameWorld = () => {
   }, [game.totalAnswered, prevAnswered]);
 
   if (game.gameOver) return <GameOverScreen />;
-  if (game.finished) return <Dashboard />;
+  if (game.finished) return (
+    <div className="min-h-screen bg-gradient-hero">
+      <header className="container py-3 flex items-center justify-between border-b bg-background/60 backdrop-blur sticky top-0 z-10">
+        <Logo />
+        <UserMenu />
+      </header>
+      <main className="container py-8 max-w-3xl">
+        <ActionPlan />
+        <div className="text-center mt-8">
+          <Button size="lg" onClick={() => game.resetGame()} className="bg-gradient-primary h-14 px-8 shadow-elegant">
+            Jogar novamente
+          </Button>
+        </div>
+      </main>
+    </div>
+  );
 
   const xpInLevel = game.xp % 100;
   const unlockedAchievements = ACHIEVEMENTS.filter((a) => game.achievements.includes(a.id));
