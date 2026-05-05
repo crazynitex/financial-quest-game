@@ -8,20 +8,9 @@ import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { Logo } from "./Logo";
 import { UserMenu } from "./UserMenu";
-import iconHouse from "@/assets/icon-house.png";
-import iconCar from "@/assets/icon-car.png";
-import iconTravel from "@/assets/icon-travel.png";
-import iconMoto from "@/assets/icon-moto.png";
 import heroImg from "@/assets/hero-character.jpg";
 import { ArrowRight, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-const goalIcons: Record<GoalType, string> = {
-  house: iconHouse,
-  car: iconCar,
-  motorcycle: iconMoto,
-  travel: iconTravel,
-};
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
