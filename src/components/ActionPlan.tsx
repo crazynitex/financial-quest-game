@@ -1,5 +1,6 @@
 import { useGame } from "@/game/store";
-import { GOAL_INFO, simulateConsortium, simulateFinancing } from "@/game/engine";
+import { GOAL_INFO, simulateConsortium, simulateFinancing, type GameState } from "@/game/engine";
+import { ARCHETYPES, assignArchetype, type ArchetypeId } from "@/game/archetypes";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Target, Sparkles, ExternalLink, CheckCircle2, Share2, Flame, Zap, Calendar, ArrowRight, QrCode } from "lucide-react";
@@ -8,7 +9,24 @@ import ademiImg from "@/assets/ademi-avatar.jpg";
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
-const ADEMICON_URL = "https://www.ademicon.com.br/";
+const GAME_URL = "https://preview--financial-quest-game.lovable.app/";
+
+function buildAdemiconUrl(game: GameState, archetypeId: ArchetypeId): string {
+  const goalInfo = GOAL_INFO[game.character.goal];
+  const archetype = ARCHETYPES[archetypeId];
+  const params = new URLSearchParams({
+    utm_source: "ademiconecta",
+    utm_medium: "game",
+    utm_campaign: "hackathon_2026",
+    utm_content: archetypeId,
+    nome: game.character.name || "",
+    objetivo: goalInfo.label,
+    valor: String(goalInfo.value),
+    renda: String(game.character.income || 0),
+    arquetipo: archetype.name,
+  });
+  return `https://www.ademicon.com.br/?${params.toString()}`;
+}
 
 /**
  * Plano de Ação — substitui o antigo Dashboard.
