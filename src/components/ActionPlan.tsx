@@ -306,6 +306,13 @@ const Stat = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const BlackStat = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-xl bg-black/40 backdrop-blur p-2 text-center border border-white/10">
+    <div className="font-display font-black text-2xl tabular-nums">{value}</div>
+    <div className="text-[9px] uppercase tracking-wider opacity-80 font-semibold mt-0.5">{label}</div>
+  </div>
+);
+
 const Mini = ({ label, value, tone }: { label: string; value: string; tone: "good" | "bad" }) => (
   <div
     className={`rounded-xl border-2 p-3 ${
