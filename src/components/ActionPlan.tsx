@@ -117,39 +117,63 @@ export const ActionPlan = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5" />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-90">
-                Ademi Conecta · Perfil
+                Resultado Ademi Conecta
               </span>
             </div>
             <button
-              onClick={shareCard}
+              onClick={shareArchetype}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-[11px] font-semibold transition"
-              title="Compartilhar"
+              title="Compartilhar meu arquétipo"
             >
-              <Share2 className="w-3 h-3" /> Compartilhar
+              <Share2 className="w-3 h-3" /> Compartilhar meu arquétipo
             </button>
           </div>
 
-          <div className="flex items-center gap-4 mb-5">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center text-3xl sm:text-4xl shadow-xl ring-2 ring-white/30">
-              {goal.emoji}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider opacity-80">{rating}</p>
-              <h2 className="font-display font-black text-2xl sm:text-3xl leading-tight truncate">
-                {game.character.name || "Você"}
-              </h2>
-              <p className="text-xs sm:text-sm opacity-90 truncate">
-                Sonha com {goal.label.toLowerCase()} · {formatBRL(goal.value)}
-              </p>
-            </div>
+          <div className="text-center mb-5">
+            <div className="text-7xl sm:text-8xl leading-none mb-2">{archetype.emoji}</div>
+            <h2 className="font-display font-black text-3xl sm:text-4xl leading-tight">
+              {archetype.name}
+            </h2>
+            <p className="italic opacity-90 text-sm sm:text-base mt-2 max-w-md mx-auto">
+              "{archetype.tagline}"
+            </p>
           </div>
 
-          {/* "Top tracks" — métricas do jogador */}
-          <div className="grid grid-cols-4 gap-2 mb-5">
-            <Stat label="Score" value={`${game.finScore}`} />
-            <Stat label="Nível" value={`${game.level}`} />
-            <Stat label="Acertos" value={`${accuracy}%`} />
-            <Stat label="Combo" value={`×${game.bestCombo}`} />
+          <div className="mb-5 p-3 rounded-xl bg-black/25 backdrop-blur border-l-4 border-[#FFD700]">
+            <p className="text-xs sm:text-sm leading-snug">
+              <span className="font-bold uppercase tracking-wider text-[10px] block mb-1 opacity-80">Insight</span>
+              {archetype.insight}
+            </p>
+          </div>
+
+          {/* Stats BuzzFeed-style */}
+          <div className="grid grid-cols-4 gap-2 mb-3">
+            <BlackStat label="Score" value={`${game.finScore}`} />
+            <BlackStat label="Nível" value={`${game.level}`} />
+            <BlackStat label="Combo Máx" value={`×${game.bestCombo}`} />
+            <BlackStat label="Acertos" value={`${accuracy}%`} />
+          </div>
+
+          <p className="text-center text-xs sm:text-sm font-semibold opacity-90 mb-5">
+            {game.character.name || "Jogador"}
+          </p>
+
+          {/* QR do arquétipo → leva pro JOGO (loop viral) */}
+          <div className="flex items-center gap-4 p-3 rounded-2xl bg-black/25 backdrop-blur border border-white/10 mb-3">
+            <div className="shrink-0 p-1.5 rounded-xl bg-white">
+              <img src={archetypeQrUrl} alt="QR Code do jogo" className="w-20 h-20 sm:w-24 sm:h-24" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider opacity-90 mb-0.5">
+                <QrCode className="w-3 h-3" /> Desafia teus amigos
+              </div>
+              <p className="font-display font-bold text-base sm:text-lg leading-tight">
+                Qual arquétipo eles são?
+              </p>
+              <p className="text-[11px] opacity-85 mt-0.5">
+                Escaneie e jogue o Ademi Conecta.
+              </p>
+            </div>
           </div>
 
           {/* QR + CTA — ponte simulação → vida real */}
