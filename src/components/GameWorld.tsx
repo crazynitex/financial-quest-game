@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Logo } from "./Logo";
 import { MentorChat } from "./MentorChat";
 import { Dashboard } from "./Dashboard";
+import { ActionPlan } from "./ActionPlan";
 import { GameOverScreen } from "./GameOverScreen";
 import { AcademyModal } from "./AcademyModal";
 import { CTABanner } from "./CTABanner";
@@ -62,10 +63,10 @@ export const GameWorld = () => {
       <Sheet open={dashboardOpen} onOpenChange={setDashboardOpen}>
         <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto p-0">
           <SheetHeader className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b px-6 py-4">
-            <SheetTitle className="font-display text-xl">Painel & Ranking</SheetTitle>
+            <SheetTitle className="font-display text-xl">Plano de Ação</SheetTitle>
           </SheetHeader>
           <div className="p-6">
-            <Dashboard embedded />
+            <ActionPlan />
           </div>
         </SheetContent>
       </Sheet>
@@ -84,9 +85,9 @@ export const GameWorld = () => {
             size="sm"
             onClick={() => setDashboardOpen(true)}
             className="px-2 sm:px-3 hover:shadow-glow transition-smooth"
-            title="Ver painel e ranking"
+            title="Ver plano de ação"
           >
-            <Award className="w-4 h-4 sm:mr-1.5 text-primary" /> <span className="hidden sm:inline">Painel</span>
+            <Award className="w-4 h-4 sm:mr-1.5 text-primary" /> <span className="hidden sm:inline">Plano</span>
           </Button>
           <UserMenu />
         </div>
