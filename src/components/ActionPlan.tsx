@@ -35,12 +35,14 @@ function buildAdemiconUrl(game: GameState, archetypeId: ArchetypeId): string {
  */
 export const ActionPlan = () => {
   const game = useGame();
+  const archetypeId = assignArchetype(game);
+  const archetype = ARCHETYPES[archetypeId];
+  const ademiconUrl = buildAdemiconUrl(game, archetypeId);
   const goal = GOAL_INFO[game.character.goal];
   const fin = simulateFinancing(goal.value);
   const cons = simulateConsortium(goal.value);
   const economy = fin.totalCost - cons.totalCost;
   const accuracy = game.totalAnswered > 0 ? Math.round((game.totalCorrect / game.totalAnswered) * 100) : 0;
-  const rating = game.finScore >= 75 ? "EXPERT" : game.finScore >= 50 ? "EM ASCENSÃO" : "INICIANTE";
 
   // Plano de ação em 4 passos personalizados
   const steps = [
@@ -70,18 +72,32 @@ export const ActionPlan = () => {
     },
   ];
 
-  // QR Code para a Ademicon (gerado por API pública, sem deps)
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
-    ADEMICON_URL
+  // QR do arquétipo → leva pro JOGO (loop viral)
+  const shareParams = new URLSearchParams({
+    utm_source: "share",
+    utm_medium: "archetype",
+    utm_campaign: "viral_loop",
+    utm_content: archetypeId,
+    convidadoPor: game.character.name || "",
+    arquetipoAmigo: archetype.name,
+  });
+  const gameShareUrl = `${GAME_URL}?${shareParams.toString()}`;
+  const archetypeQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
+    gameShareUrl
   )}&bgcolor=0f172a&color=ffffff&qzone=2`;
 
-  const shareCard = async () => {
-    const text = `🔥 Sou ${rating} em educação financeira na Ademi Conecta! Score ${game.finScore}/100 · Nível ${game.level} · ${accuracy}% de acertos. Bora?`;
+  // QR do final → leva pra ADEMICON (conversão real)
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
+    ademiconUrl
+  )}&bgcolor=0f172a&color=ffffff&qzone=2`;
+
+  const shareArchetype = async () => {
+    const text = `Joguei o Ademi Conecta e descobri que sou "${archetype.name}" ${archetype.emoji}\n\n"${archetype.tagline}"\n\nQual arquétipo você é? Joga aí 👇`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Meu perfil Ademi Conecta", text, url: ADEMICON_URL });
+        await navigator.share({ title: "Meu arquétipo no Ademi Conecta", text, url: gameShareUrl });
       } else {
-        await navigator.clipboard.writeText(`${text} ${ADEMICON_URL}`);
+        await navigator.clipboard.writeText(`${text}\n${gameShareUrl}`);
       }
     } catch {
       /* noop */
