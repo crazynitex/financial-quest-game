@@ -75,7 +75,7 @@ const initialQuiz: QuizState = {
 };
 
 const initial: GameState & QuizState = {
-  character: { name: "", age: 25, income: 4000, goal: "house" },
+  character: { name: "", age: 25, income: 4000, goal: "firstHome" },
   cash: 5000,
   savings: 0,
   invested: 0,
