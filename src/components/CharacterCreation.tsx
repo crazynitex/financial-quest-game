@@ -20,7 +20,7 @@ export const CharacterCreation = () => {
   const [name, setName] = useState("");
   const [age, setAge] = useState([28]);
   const [income, setIncome] = useState([4000]);
-  const [goal, setGoal] = useState<GoalType>("house");
+  const [goal, setGoal] = useState<GoalType>("firstHome");
 
   const canStart = name.trim().length >= 2;
   const expectedExpenses = Math.round(income[0] * 0.65);
