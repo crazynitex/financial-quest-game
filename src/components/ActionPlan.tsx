@@ -257,7 +257,7 @@ export const ActionPlan = () => {
             "Você já provou que entende. Agora dá o passo que importa de verdade — fora do jogo."
           </p>
           <Button asChild size="sm" className="bg-gradient-primary shadow-glow">
-            <a href={ADEMICON_URL} target="_blank" rel="noopener noreferrer">
+            <a href={ademiconUrl} target="_blank" rel="noopener noreferrer">
               Sair da simulação <ArrowRight className="w-4 h-4 ml-1" />
             </a>
           </Button>
