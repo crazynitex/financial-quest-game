@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Logo } from "./Logo";
 import { MentorChat } from "./MentorChat";
-import { Dashboard } from "./Dashboard";
 import { ActionPlan } from "./ActionPlan";
 import { GameOverScreen } from "./GameOverScreen";
 import { AcademyModal } from "./AcademyModal";
