@@ -281,7 +281,7 @@ export const ActionPlan = () => {
 
       {/* ===== CTA final reforçado ===== */}
       <a
-        href={ADEMICON_URL}
+        href={ademiconUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="block p-5 rounded-2xl bg-gradient-primary text-primary-foreground shadow-elegant hover:scale-[1.01] transition-transform"
