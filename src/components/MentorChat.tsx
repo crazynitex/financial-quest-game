@@ -130,7 +130,7 @@ export const MentorChat = () => {
     <div className="flex flex-col h-full bg-gradient-card rounded-3xl border-2 overflow-hidden">
       <div className="flex items-center gap-3 p-4 border-b bg-background/60">
         <div className="relative">
-          <img src={mentorImg} alt="Ademi — Mentora IA" className="w-12 h-12 rounded-full object-cover bg-accent ring-2 ring-primary" />
+          <img src={mentorImg} alt="Ademi — Mentora IA" className="w-12 h-12 rounded-full object-cover object-top bg-accent ring-2 ring-primary" />
           <span className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-background" />
         </div>
         <div>
