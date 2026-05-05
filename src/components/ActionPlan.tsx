@@ -247,7 +247,7 @@ export const ActionPlan = () => {
         </div>
         <div className="relative max-w-[70%]">
           <div className="flex items-center gap-2 mb-2">
-            <img src={ademiImg} alt="Ademi" className="w-10 h-10 rounded-full object-cover bg-accent ring-2 ring-primary" />
+            <img src={ademiImg} alt="Ademi" className="w-10 h-10 rounded-full object-cover object-top bg-accent ring-2 ring-primary" />
             <div>
               <p className="font-display font-bold text-sm">Ademi</p>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Sua mentora IA</p>
