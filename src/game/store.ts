@@ -1,8 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Character, Decision, GameState } from "./engine";
+import type { Character, Decision, GameState, GoalType } from "./engine";
+import { GOAL_INFO } from "./engine";
 import { QUIZ_BANK } from "./quizBank";
 import { supabase } from "@/integrations/supabase/client";
+
+const VALID_GOALS = new Set(Object.keys(GOAL_INFO));
+const sanitizeGoal = (g: any): GoalType =>
+  (VALID_GOALS.has(g) ? g : "firstHome") as GoalType;
 
 interface GameStore extends GameState, QuizState {
   hydrated: boolean;
