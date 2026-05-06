@@ -357,6 +357,13 @@ export const useGame = create<GameStore>()(
         if (error) console.error("Failed to save:", error);
       },
     }),
-    { name: "consorcio-quest-state" }
+    {
+      name: "consorcio-quest-state",
+      onRehydrateStorage: () => (state) => {
+        if (state?.character) {
+          state.character.goal = sanitizeGoal(state.character.goal);
+        }
+      },
+    }
   )
 );
