@@ -86,10 +86,6 @@ export const ActionPlan = () => {
     gameShareUrl
   )}&bgcolor=0f172a&color=ffffff&qzone=2`;
 
-  // QR do final → leva pra ADEMICON (conversão real)
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
-    ademiconUrl
-  )}&bgcolor=0f172a&color=ffffff&qzone=2`;
 
   const shareArchetype = async () => {
     const text = `Joguei o Ademi Conecta e descobri que sou "${archetype.name}" ${archetype.emoji}\n\n"${archetype.tagline}"\n\nQual arquétipo você é? Joga aí 👇`;
