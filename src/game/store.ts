@@ -342,7 +342,9 @@ export const useGame = create<GameStore>()(
           return;
         }
         if (data?.state && Object.keys(data.state).length > 0) {
-          set({ ...initial, ...(data.state as any), hydrated: true });
+          const merged = { ...initial, ...(data.state as any), hydrated: true };
+          if (merged.character) merged.character.goal = sanitizeGoal(merged.character.goal);
+          set(merged);
         } else {
           set({ ...initial, hydrated: true });
         }
