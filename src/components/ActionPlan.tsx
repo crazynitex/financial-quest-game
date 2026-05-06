@@ -159,7 +159,7 @@ export const ActionPlan = () => {
           </p>
 
           {/* QR do arquétipo → leva pro JOGO (loop viral) */}
-          <div className="flex items-center gap-4 p-3 rounded-2xl bg-black/25 backdrop-blur border border-white/10 mb-3">
+          <div className="flex items-center gap-4 p-3 rounded-2xl bg-black/25 backdrop-blur border border-white/10">
             <div className="shrink-0 p-1.5 rounded-xl bg-white">
               <img src={archetypeQrUrl} alt="QR Code do jogo" className="w-20 h-20 sm:w-24 sm:h-24" />
             </div>
@@ -172,24 +172,6 @@ export const ActionPlan = () => {
               </p>
               <p className="text-[11px] opacity-85 mt-0.5">
                 Escaneie e jogue o Ademi Conecta.
-              </p>
-            </div>
-          </div>
-
-          {/* QR + CTA — ponte simulação → vida real */}
-          <div className="flex items-center gap-4 p-3 rounded-2xl bg-black/25 backdrop-blur border border-white/10">
-            <div className="shrink-0 p-1.5 rounded-xl bg-white">
-              <img src={qrUrl} alt="QR Code Ademicon" className="w-20 h-20 sm:w-24 sm:h-24" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider opacity-90 mb-0.5">
-                <QrCode className="w-3 h-3" /> Aponte a câmera
-              </div>
-              <p className="font-display font-bold text-base sm:text-lg leading-tight">
-                Saia da simulação. Realize.
-              </p>
-              <p className="text-[11px] opacity-85 mt-0.5">
-                Escaneie e abra a Ademicon no celular agora.
               </p>
             </div>
           </div>
