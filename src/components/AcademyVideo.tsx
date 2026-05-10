@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, Volume2, VolumeX, CheckCircle2, XCircle, TrendingDown, TrendingUp, Sparkles, ExternalLink } from "lucide-react";
+import { ADEMICON_URL } from "@/lib/urls";
 
 /**
  * Vídeo-aula animada (60s) — feita 100% em React/CSS, sem MP4.
@@ -550,7 +551,7 @@ const CTAScene = ({ t }: { t: number }) => {
         Agora é a sua vez de <span className="text-amber-300">conquistar</span> com inteligência.
       </h3>
       <a
-        href="https://www.ademicon.com.br/"
+        href={ADEMICON_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 font-bold text-sm shadow-xl hover:scale-105 transition-transform"

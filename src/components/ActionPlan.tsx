@@ -1,15 +1,16 @@
+import { useState, useRef } from "react";
+import html2canvas from "html2canvas";
 import { useGame } from "@/game/store";
 import { GOAL_INFO, simulateConsortium, simulateFinancing, type GameState } from "@/game/engine";
 import { ARCHETYPES, assignArchetype, type ArchetypeId } from "@/game/archetypes";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trophy, Target, Sparkles, ExternalLink, CheckCircle2, Share2, Flame, Zap, Calendar, ArrowRight, QrCode } from "lucide-react";
+import { Trophy, Target, Sparkles, ExternalLink, CheckCircle2, Share2, Flame, Zap, Calendar, ArrowRight, QrCode, Camera, Upload, X } from "lucide-react";
 import ademiImg from "@/assets/ademi-avatar.jpg";
+import { GAME_URL, ADEMICON_URL } from "@/lib/urls";
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
-
-const GAME_URL = "https://preview--financial-quest-game.lovable.app/";
 
 function buildAdemiconUrl(game: GameState, archetypeId: ArchetypeId): string {
   const goalInfo = GOAL_INFO[game.character.goal];
@@ -25,7 +26,7 @@ function buildAdemiconUrl(game: GameState, archetypeId: ArchetypeId): string {
     renda: String(game.character.income || 0),
     arquetipo: archetype.name,
   });
-  return `https://www.ademicon.com.br/?${params.toString()}`;
+  return `${ADEMICON_URL}?${params.toString()}`;
 }
 
 /**
@@ -87,23 +88,78 @@ export const ActionPlan = () => {
   )}&bgcolor=0f172a&color=ffffff&qzone=2`;
 
 
+  const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Foto muito grande. Use uma menor que 5MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUserPhoto(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removePhoto = () => {
+    setUserPhoto(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const shareArchetype = async () => {
     const text = `Joguei o Ademi Conecta e descobri que sou "${archetype.name}" ${archetype.emoji}\n\n"${archetype.tagline}"\n\nQual arquétipo você é? Joga aí 👇`;
+
     try {
-      if (navigator.share) {
+      if (cardRef.current && typeof navigator.canShare === "function") {
+        const canvas = await html2canvas(cardRef.current, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          scale: 2,
+        });
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            await navigator.share({ title: "Meu arquétipo no Ademi Conecta", text, url: gameShareUrl });
+            return;
+          }
+          const file = new File([blob], `arquetipo-${archetypeId}.png`, { type: "image/png" });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: "Meu arquétipo no Ademi Conecta",
+              text,
+              url: gameShareUrl,
+              files: [file],
+            });
+          } else {
+            await navigator.share({ title: "Meu arquétipo no Ademi Conecta", text, url: gameShareUrl });
+          }
+        }, "image/png");
+      } else if (navigator.share) {
         await navigator.share({ title: "Meu arquétipo no Ademi Conecta", text, url: gameShareUrl });
       } else {
         await navigator.clipboard.writeText(`${text}\n${gameShareUrl}`);
+        if (cardRef.current) {
+          const canvas = await html2canvas(cardRef.current, { scale: 2, backgroundColor: null });
+          const link = document.createElement("a");
+          link.download = `meu-arquetipo-${archetypeId}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        }
       }
-    } catch {
-      /* noop */
+    } catch (err) {
+      console.warn("Share falhou:", err);
     }
   };
 
   return (
     <div className="space-y-5">
       {/* ===== Spotify-style Profile Card ===== */}
-      <Card className="relative overflow-hidden border-0 p-0 shadow-elegant">
+      <Card ref={cardRef} className="relative overflow-hidden border-0 p-0 shadow-elegant">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-glow to-primary opacity-90" />
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-black/20 blur-3xl" />
@@ -126,7 +182,36 @@ export const ActionPlan = () => {
           </div>
 
           <div className="text-center mb-5">
-            <div className="text-7xl sm:text-8xl leading-none mb-2">{archetype.emoji}</div>
+            {userPhoto ? (
+              <div className="relative inline-block mb-3">
+                <img
+                  src={userPhoto}
+                  alt="Sua foto"
+                  className="w-32 h-32 sm:w-36 sm:h-36 rounded-full object-cover ring-4 ring-white/30 shadow-xl"
+                />
+                <div className="absolute -bottom-1 -right-1 w-12 h-12 rounded-full bg-black/60 backdrop-blur border-2 border-white/30 flex items-center justify-center text-2xl">
+                  {archetype.emoji}
+                </div>
+                <button
+                  onClick={removePhoto}
+                  className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition"
+                  title="Remover foto"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="text-7xl sm:text-8xl leading-none mb-2">{archetype.emoji}</div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mt-1 mb-2 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-xs font-medium backdrop-blur transition"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  Personalizar com sua foto
+                </button>
+              </>
+            )}
             <h2 className="font-display font-black text-3xl sm:text-4xl leading-tight">
               {archetype.name}
             </h2>
@@ -134,6 +219,15 @@ export const ActionPlan = () => {
               "{archetype.tagline}"
             </p>
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="user"
+            onChange={handlePhotoUpload}
+            className="hidden"
+          />
 
           <div className="mb-5 p-3 rounded-xl bg-black/25 backdrop-blur border-l-4 border-[#FFD700]">
             <p className="text-xs sm:text-sm leading-snug">
