@@ -159,7 +159,7 @@ export const ActionPlan = () => {
   return (
     <div className="space-y-5">
       {/* ===== Spotify-style Profile Card ===== */}
-      <Card className="relative overflow-hidden border-0 p-0 shadow-elegant">
+      <Card ref={cardRef} className="relative overflow-hidden border-0 p-0 shadow-elegant">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-glow to-primary opacity-90" />
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-black/20 blur-3xl" />
@@ -182,7 +182,36 @@ export const ActionPlan = () => {
           </div>
 
           <div className="text-center mb-5">
-            <div className="text-7xl sm:text-8xl leading-none mb-2">{archetype.emoji}</div>
+            {userPhoto ? (
+              <div className="relative inline-block mb-3">
+                <img
+                  src={userPhoto}
+                  alt="Sua foto"
+                  className="w-32 h-32 sm:w-36 sm:h-36 rounded-full object-cover ring-4 ring-white/30 shadow-xl"
+                />
+                <div className="absolute -bottom-1 -right-1 w-12 h-12 rounded-full bg-black/60 backdrop-blur border-2 border-white/30 flex items-center justify-center text-2xl">
+                  {archetype.emoji}
+                </div>
+                <button
+                  onClick={removePhoto}
+                  className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition"
+                  title="Remover foto"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="text-7xl sm:text-8xl leading-none mb-2">{archetype.emoji}</div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mt-1 mb-2 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-xs font-medium backdrop-blur transition"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  Personalizar com sua foto
+                </button>
+              </>
+            )}
             <h2 className="font-display font-black text-3xl sm:text-4xl leading-tight">
               {archetype.name}
             </h2>
@@ -190,6 +219,15 @@ export const ActionPlan = () => {
               "{archetype.tagline}"
             </p>
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="user"
+            onChange={handlePhotoUpload}
+            className="hidden"
+          />
 
           <div className="mb-5 p-3 rounded-xl bg-black/25 backdrop-blur border-l-4 border-[#FFD700]">
             <p className="text-xs sm:text-sm leading-snug">
