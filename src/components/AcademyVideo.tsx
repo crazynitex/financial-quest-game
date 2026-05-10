@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, Volume2, VolumeX, CheckCircle2, XCircle, TrendingDown, TrendingUp, Sparkles, ExternalLink } from "lucide-react";
+import { ADEMICON_URL } from "@/lib/urls";
 
 /**
  * Vídeo-aula animada (60s) — feita 100% em React/CSS, sem MP4.
