@@ -1,15 +1,16 @@
+import { useState, useRef } from "react";
+import html2canvas from "html2canvas";
 import { useGame } from "@/game/store";
 import { GOAL_INFO, simulateConsortium, simulateFinancing, type GameState } from "@/game/engine";
 import { ARCHETYPES, assignArchetype, type ArchetypeId } from "@/game/archetypes";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trophy, Target, Sparkles, ExternalLink, CheckCircle2, Share2, Flame, Zap, Calendar, ArrowRight, QrCode } from "lucide-react";
+import { Trophy, Target, Sparkles, ExternalLink, CheckCircle2, Share2, Flame, Zap, Calendar, ArrowRight, QrCode, Camera, Upload, X } from "lucide-react";
 import ademiImg from "@/assets/ademi-avatar.jpg";
+import { GAME_URL, ADEMICON_URL } from "@/lib/urls";
 
 const formatBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
-
-const GAME_URL = "https://preview--financial-quest-game.lovable.app/";
 
 function buildAdemiconUrl(game: GameState, archetypeId: ArchetypeId): string {
   const goalInfo = GOAL_INFO[game.character.goal];
