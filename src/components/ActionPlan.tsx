@@ -26,7 +26,7 @@ function buildAdemiconUrl(game: GameState, archetypeId: ArchetypeId): string {
     renda: String(game.character.income || 0),
     arquetipo: archetype.name,
   });
-  return `https://www.ademicon.com.br/?${params.toString()}`;
+  return `${ADEMICON_URL}?${params.toString()}`;
 }
 
 /**
