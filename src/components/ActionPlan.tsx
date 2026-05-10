@@ -88,16 +88,71 @@ export const ActionPlan = () => {
   )}&bgcolor=0f172a&color=ffffff&qzone=2`;
 
 
+  const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Foto muito grande. Use uma menor que 5MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUserPhoto(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removePhoto = () => {
+    setUserPhoto(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const shareArchetype = async () => {
     const text = `Joguei o Ademi Conecta e descobri que sou "${archetype.name}" ${archetype.emoji}\n\n"${archetype.tagline}"\n\nQual arquétipo você é? Joga aí 👇`;
+
     try {
-      if (navigator.share) {
+      if (cardRef.current && typeof navigator.canShare === "function") {
+        const canvas = await html2canvas(cardRef.current, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          scale: 2,
+        });
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            await navigator.share({ title: "Meu arquétipo no Ademi Conecta", text, url: gameShareUrl });
+            return;
+          }
+          const file = new File([blob], `arquetipo-${archetypeId}.png`, { type: "image/png" });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: "Meu arquétipo no Ademi Conecta",
+              text,
+              url: gameShareUrl,
+              files: [file],
+            });
+          } else {
+            await navigator.share({ title: "Meu arquétipo no Ademi Conecta", text, url: gameShareUrl });
+          }
+        }, "image/png");
+      } else if (navigator.share) {
         await navigator.share({ title: "Meu arquétipo no Ademi Conecta", text, url: gameShareUrl });
       } else {
         await navigator.clipboard.writeText(`${text}\n${gameShareUrl}`);
+        if (cardRef.current) {
+          const canvas = await html2canvas(cardRef.current, { scale: 2, backgroundColor: null });
+          const link = document.createElement("a");
+          link.download = `meu-arquetipo-${archetypeId}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        }
       }
-    } catch {
-      /* noop */
+    } catch (err) {
+      console.warn("Share falhou:", err);
     }
   };
 
